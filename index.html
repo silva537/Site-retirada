@@ -1,221 +1,513 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Controle RG</title>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Controle RG</title>
 <style>
 *{box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:16px;color:#1f2937}
 h1{text-align:center;margin:0 0 12px}
-.topo{display:flex;gap:8px;margin-bottom:4px}
+.topo{display:flex;gap:8px}
 .search{flex:1;min-width:0;padding:12px;border-radius:8px;border:1px solid #ccc;font-size:16px}
 .novo{padding:0 14px;border:0;border-radius:8px;background:#111827;color:#fff;font-size:15px;cursor:pointer;white-space:nowrap}
-.resumo{font-size:13px;color:#6b7280;margin:8px 2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px}
+.chip{flex:none;padding:7px 12px;border-radius:16px;border:1px solid #d1d5db;background:#fff;font-size:13px;cursor:pointer}
+.chip.on{background:#111827;color:#fff;border-color:#111827}
+.linha{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.mini{padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;background:#fff;font-size:13px;cursor:pointer}
+.bulk{width:100%;margin-top:10px;padding:12px;border:0;border-radius:8px;background:#25D366;color:#fff;font-size:15px;cursor:pointer}
+.bulk:disabled{opacity:.5;cursor:default}
+.ajuda{font-size:12px;color:#6b7280;margin:6px 2px 0}
+.resumo{font-size:13px;color:#6b7280;margin:10px 2px 0}
 .card{background:#fff;margin-top:10px;padding:12px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.15);display:flex;gap:12px;align-items:flex-start}
+.card.ret{opacity:.65}
+.lado{display:flex;flex-direction:column;align-items:center;gap:8px}
+.sel input{width:20px;height:20px}
 .num{flex:none;min-width:34px;height:34px;border-radius:17px;background:#e5e7eb;color:#374151;font-weight:bold;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0 6px}
 .info{flex:1;min-width:0}
 .nome{font-weight:bold;word-break:break-word}
 .tel{margin-top:2px;color:#4b5563}
 .sem{margin-top:2px;color:#b45309;font-style:italic}
+.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;font-style:normal}
+.tel .tag:first-child{margin-left:0}
+.tag.env{background:#dbeafe;color:#1e40af}
+.tag.ret{background:#dcfce7;color:#166534}
 .acoes{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:0;border-radius:6px;font-size:14px;text-decoration:none;cursor:pointer;color:#fff}
 .zap{background:#25D366}
 .zap svg{width:18px;height:18px;fill:#fff}
 .edit{background:#2563eb}
 .add{background:#b45309}
+.retb{background:#15803d}
+.desf{background:#6b7280}
 .vazio{text-align:center;color:#6b7280;margin-top:24px}
 .fundo{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
 .fundo.aberto{display:flex}
-.modal{background:#fff;border-radius:12px;padding:16px;width:100%;max-width:380px}
+.modal{background:#fff;border-radius:12px;padding:16px;width:100%;max-width:400px;max-height:90vh;overflow:auto}
 .modal h2{margin:0 0 12px;font-size:18px}
+.modal h3{margin:16px 0 4px;font-size:15px}
 .modal label{display:block;font-size:13px;color:#4b5563;margin:10px 0 4px}
-.modal input{width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+.modal label.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:#1f2937;margin:12px 0 0}
+.modal label.chk input{width:20px;height:20px}
+.modal input:not([type=checkbox]),.modal textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;font-size:16px;font-family:inherit}
+.modal textarea{min-height:90px;resize:vertical}
 .dica{font-size:12px;color:#6b7280;margin-top:4px}
 .erro{color:#b91c1c;font-size:13px;margin-top:8px;min-height:16px}
-.rodape{display:flex;gap:8px;margin-top:12px}
+.msgok{font-size:13px;color:#166534;margin-top:8px;white-space:pre-line}
+.rodape{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .rodape .btn{flex:1;justify-content:center}
 .salvar{background:#111827}
 .cancelar{background:#6b7280}
 .excluir{background:#b91c1c;flex:none!important}
-.rodape{flex-wrap:wrap}
-.bulk{width:100%;margin-top:8px;padding:12px;border:0;border-radius:8px;background:#25D366;color:#fff;font-size:15px;cursor:pointer}
-.ok{color:#15803d;font-size:12px}
-.ajuda{font-size:12px;color:#6b7280;margin:6px 2px 0}
 .fila-prog{font-size:13px;color:#6b7280}
 .fila-nome{font-weight:bold;font-size:17px;margin:4px 0;word-break:break-word}
 .fila-tel{color:#4b5563}
+details{margin-top:8px;font-size:12px;color:#4b5563}
+pre{background:#f3f4f6;padding:8px;border-radius:6px;white-space:pre-wrap;word-break:break-all;font-size:11px}
 </style></head><body>
 <h1>Retirada de RG</h1>
 <div class="topo">
   <input class="search" id="q" placeholder="Pesquisar nome ou número..." oninput="render()">
-  <button class="novo" onclick="abrir(-1)">+ Novo</button>
+  <button class="novo" onclick="abrir('')">+ Novo</button>
 </div>
-<button class="bulk" onclick="abrirFila()">Enviar para todos</button>
-<div class="ajuda">Abre o WhatsApp de um contato por vez com a mensagem pronta, para você enviar a todos. Para falar com uma pessoa só, use o botão WhatsApp no nome dela.</div>
+<div class="chips" id="chips"></div>
+<div class="linha">
+  <button class="mini" onclick="marcarVisiveis()">Marcar visíveis</button>
+  <button class="mini" onclick="limparSel()">Limpar marcação</button>
+  <button class="mini" onclick="abrirImport()">Importar lista</button>
+  <button class="mini" onclick="abrirAjustes()">Ajustes</button>
+</div>
+<button class="bulk" id="bulk" onclick="abrirFila()">Enviar</button>
+<div class="ajuda">Sem ninguém marcado: abre o WhatsApp, um contato por vez, de quem tem número, ainda não recebeu a mensagem e não retirou o RG. Com nomes marcados: envia só a eles. Para falar com uma pessoa só, use o botão WhatsApp no nome dela.</div>
 <div class="resumo" id="resumo"></div>
 <div id="lista"></div>
 
-<div class="fundo" id="fundo">
-  <div class="modal">
-    <h2 id="tituloModal">Novo cadastro</h2>
-    <label for="fNome">Nome</label>
-    <input id="fNome" autocomplete="off">
-    <label for="fTel">Número (com DDD)</label>
-    <input id="fTel" type="tel" inputmode="numeric" placeholder="21999999999" autocomplete="off">
-    <div class="dica">Pode deixar em branco e adicionar o número depois.</div>
-    <div class="erro" id="erro"></div>
-    <div class="rodape">
-      <button class="btn excluir" id="bExcluir" onclick="excluir()">Excluir</button>
-      <button class="btn cancelar" onclick="fechar()">Cancelar</button>
-      <button class="btn salvar" onclick="salvar()">Salvar</button>
-    </div>
+<!-- Cadastro / edição -->
+<div class="fundo" id="fundo"><div class="modal">
+  <h2 id="tituloModal">Novo cadastro</h2>
+  <label for="fNome">Nome</label>
+  <input id="fNome" autocomplete="off">
+  <label for="fTel">Número (com DDD)</label>
+  <input id="fTel" type="tel" inputmode="numeric" placeholder="21999999999" autocomplete="off" oninput="ajustarEnv()">
+  <div class="dica">Pode deixar em branco e adicionar o número depois.</div>
+  <label class="chk"><input type="checkbox" id="fRet"> RG já retirado</label>
+  <label class="chk"><input type="checkbox" id="fEnv"> Mensagem já enviada</label>
+  <div class="erro" id="erro"></div>
+  <div class="rodape">
+    <button class="btn excluir" id="bExcluir" onclick="excluir()">Excluir</button>
+    <button class="btn cancelar" onclick="fechar('fundo')">Cancelar</button>
+    <button class="btn salvar" onclick="salvarContato()">Salvar</button>
   </div>
-</div>
+</div></div>
 
-<div class="fundo" id="fundoFila">
-  <div class="modal">
-    <h2>Enviar para todos</h2>
-    <div id="filaCorpo"></div>
-    <div class="rodape" id="filaBotoes"></div>
+<!-- Envio em fila -->
+<div class="fundo" id="fundoFila"><div class="modal">
+  <h2 id="filaTitulo">Enviar</h2>
+  <div id="filaCorpo"></div>
+  <div class="rodape" id="filaBotoes"></div>
+</div></div>
+
+<!-- Importar lista -->
+<div class="fundo" id="fundoImport"><div class="modal">
+  <h2>Importar lista</h2>
+  <div class="dica">Cole um nome por linha, com ou sem número. Exemplos:<br>Maria Souza;21999998888<br>João Pereira - (21) 98888-7777<br>Ana Lima</div>
+  <label for="iTexto">Lista</label>
+  <textarea id="iTexto" style="min-height:140px"></textarea>
+  <div class="dica">Nomes que já existem sem número recebem o número da lista. Nomes repetidos são ignorados.</div>
+  <div class="msgok" id="iMsg"></div>
+  <div class="rodape">
+    <button class="btn cancelar" onclick="fechar('fundoImport')">Fechar</button>
+    <button class="btn salvar" onclick="importar()">Importar</button>
   </div>
-</div>
+</div></div>
+
+<!-- Ajustes -->
+<div class="fundo" id="fundoAjustes"><div class="modal">
+  <h2>Ajustes</h2>
+  <h3>Mensagem</h3>
+  <label for="aTexto">Texto</label>
+  <textarea id="aTexto"></textarea>
+  <label for="aLink">Link do grupo (vai no fim da mensagem)</label>
+  <input id="aLink" autocomplete="off">
+
+  <h3>Backup</h3>
+  <div class="rodape" style="margin-top:4px">
+    <button class="btn salvar" onclick="baixarBackup()">Salvar backup</button>
+    <button class="btn cancelar" onclick="document.getElementById('arqBackup').click()">Restaurar backup</button>
+  </div>
+  <input type="file" id="arqBackup" accept=".json,application/json" style="display:none" onchange="restaurarBackup(this)">
+  <div class="dica">O backup guarda nomes, números, marcações e a mensagem.</div>
+
+  <h3>Usar em mais de um celular (opcional)</h3>
+  <label for="aUrl">Endereço do banco (Firebase Realtime Database)</label>
+  <input id="aUrl" autocomplete="off" placeholder="https://seu-projeto-default-rtdb.firebaseio.com">
+  <label for="aCodigo">Código da lista</label>
+  <input id="aCodigo" autocomplete="off">
+  <div class="rodape" style="margin-top:6px">
+    <button class="btn cancelar" onclick="gerarCodigo()">Gerar código</button>
+    <button class="btn cancelar" onclick="puxar(true)">Sincronizar agora</button>
+  </div>
+  <div class="dica" id="syncStatus"></div>
+  <details><summary>Como ligar</summary>
+    1) Crie um projeto em console.firebase.google.com e um Realtime Database.<br>
+    2) Cole o endereço do banco acima.<br>
+    3) Em Regras, cole o texto abaixo e publique:
+    <pre>{"rules":{".read":false,".write":false,"listas":{"$id":{".read":true,".write":true}}}}</pre>
+    4) Gere um código aqui e use o mesmo endereço e o mesmo código nos outros aparelhos.<br>
+    Quem tiver o endereço e o código consegue ver e alterar a lista (que tem nomes e telefones). Não compartilhe com quem não deve ter acesso. Se duas pessoas editarem ao mesmo tempo, vale a última alteração.
+  </details>
+  <div class="erro" id="aErro"></div>
+  <div class="rodape">
+    <button class="btn cancelar" onclick="fechar('fundoAjustes')">Cancelar</button>
+    <button class="btn salvar" onclick="salvarAjustes()">Salvar</button>
+  </div>
+</div></div>
 
 <script>
-const CHAVE='controleRG_contatos';
-const LINK_GRUPO='https://chat.whatsapp.com/B4uXo65c01y4oKos58HPqH?s=cl&p=a&iam=2';
-const CHAVE_ENV='controleRG_enviados';
-function MENSAGEM(){return 'Olá! Estou entrando em contato sobre a retirada do RG.\nEntre nesse link para receber informações:\n'+LINK_GRUPO}
+const K={c:'controleRG_contatos',e:'controleRG_enviados',cfg:'controleRG_config',t:'controleRG_t'};
+const TEXTO_PADRAO='Olá! Estou entrando em contato sobre a retirada do RG.\nEntre nesse link para receber informações:';
+const LINK_PADRAO='https://chat.whatsapp.com/B4uXo65c01y4oKos58HPqH?s=cl&p=a&iam=2';
+const ICONE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#25D366" d="M8.6 7.5c-.6 0-1.1.5-1.1 1.4 0 3.2 3.4 6.6 6.7 6.7.9 0 1.4-.5 1.4-1.1l-.1-.8-1.8-.8-.8.9c-1.1-.5-2.1-1.5-2.6-2.6l.9-.8-.8-1.8z"/></svg>';
 const padrao=[
 ['Lucila Dias','21974209733'],['Marcelo Lúcio','21966470711'],['Paulo C. Batista S.','21975348526'],['Celmo C. da Silva','21975348526'],['Irene de Lima C.','21975348526'],['Emanuel M. S. N.','21979981378'],['Esther J. M. Santos','21979981378'],['Paulo C. M. de Souza','21979981378'],['Rosimeri Pinheiro','21976025530'],['Alben A. da Silva','21990249014'],['Genésio V. Chaves','21991274620'],['Rodrigo Gomes A. Carvalho','21976900442'],['Marilza C. Dias','21976900442'],['Rafaela Gomes','21966934579'],['Sarah Júlia Amorim','21986199389'],['Marcela T. dos Santos','21970647611']];
+const FILTROS=[['todos','Todos'],['sem','Sem número'],['naoenv','Não enviados'],['env','Enviados'],['ret','RG retirado']];
 
-let contatos=carregar();
-let editando=-1;
-let enviados=carregarEnv();
-let fila=[],pos=0;
-
-function carregar(){
-  try{
-    const s=localStorage.getItem(CHAVE);
-    if(s){const l=JSON.parse(s);if(Array.isArray(l))return l}
-  }catch(e){}
-  return padrao.map(c=>[c[0],c[1]]);
-}
-function gravar(){
-  try{localStorage.setItem(CHAVE,JSON.stringify(contatos))}catch(e){}
-}
-function esc(t){
-  return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function soDigitos(t){
-  let d=String(t||'').replace(/\D/g,'');
-  if(d.length>11&&d.startsWith('55'))d=d.slice(2);
-  return d;
-}
+function ler(k,def){try{const s=localStorage.getItem(k);if(s!==null)return JSON.parse(s)}catch(e){}return def}
+function gravar(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function esc(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function soDigitos(t){let d=String(t||'').replace(/\D/g,'');if(d.length>11&&d.startsWith('55'))d=d.slice(2);return d}
+function telValido(d){return d.length===10||d.length===11}
 function formatar(d){
   if(d.length===11)return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
   if(d.length===10)return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
   return d;
 }
-const ICONE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#25D366" d="M8.6 7.5c-.6 0-1.1.5-1.1 1.400 0 3.200 3.400 6.600 6.700 6.700.9 0 1.400-.5 1.400-1.100l-.1-.8-1.800-.8-.8.9c-1.100-.5-2.100-1.500-2.600-2.600l.9-.8-.8-1.800z"/></svg>';
+function novoId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function normalizar(l){
+  if(!Array.isArray(l))return [];
+  const usados=new Set();
+  return l.map(c=>{
+    const o=Array.isArray(c)?{nome:c[0],tel:c[1]}:(c||{});
+    let id=String(o.id||'');
+    if(!/^[a-z0-9]{3,30}$/.test(id)||usados.has(id))id=novoId();
+    usados.add(id);
+    const t=soDigitos(o.tel);
+    return {id,nome:String(o.nome||'').trim().replace(/\s+/g,' ').slice(0,120),tel:telValido(t)?t:'',ret:!!o.ret};
+  }).filter(c=>c.nome);
+}
+function normEnv(l){return (Array.isArray(l)?l:[]).map(String).filter(x=>/^\d{10,11}$/.test(x))}
 
-function render(){
-  const q=document.getElementById('q').value.toLowerCase().trim();
-  const qd=q.replace(/\D/g,'');
-  let h='',achados=0;
-  contatos.forEach((c,i)=>{
-    const nome=c[0].toLowerCase();
-    const ok=!q||nome.includes(q)||(qd&&c[1].includes(qd));
-    if(!ok)return;
-    achados++;
-    const msg=encodeURIComponent(MENSAGEM());
-    const tel=c[1]
-      ?`<div class="tel">${esc(formatar(c[1]))}${enviados.includes(c[1])?' <span class="ok">✓ enviado</span>':''}</div>`
-      :`<div class="sem">Sem número cadastrado</div>`;
-    const zap=c[1]
-      ?`<a class="btn zap" target="_blank" rel="noopener" href="https://wa.me/55${c[1]}?text=${msg}">${ICONE}WhatsApp</a>`
-      :`<button class="btn add" onclick="abrir(${i})">Adicionar número</button>`;
-    const edit=c[1]?`<button class="btn edit" onclick="abrir(${i})">Editar</button>`:'';
-    h+=`<div class="card"><div class="num">${i+1}</div><div class="info"><div class="nome">${esc(c[0])}</div>${tel}<div class="acoes">${zap}${edit}</div></div></div>`;
-  });
-  if(!achados)h='<div class="vazio">Nenhum nome encontrado.</div>';
-  const sem=contatos.filter(c=>!c[1]).length;
-  document.getElementById('resumo').textContent=contatos.length+' nomes'+(sem?' · '+sem+' sem número':'');
-  document.getElementById('lista').innerHTML=h;
-}
+let cfg=Object.assign({texto:TEXTO_PADRAO,link:LINK_PADRAO,dbUrl:'',codigo:''},ler(K.cfg,{}));
+let contatos=normalizar(ler(K.c,null)||padrao);
+let enviados=normEnv(ler(K.e,[]));
+let tLocal=Number(ler(K.t,0))||0;
+let filtro='todos',editando='',fila=[],pos=0,syncTimer=null;
+const sel=new Set();
 
-function abrir(i){
-  editando=i;
-  const novo=i<0;
-  document.getElementById('tituloModal').textContent=novo?'Novo cadastro':'Editar cadastro';
-  document.getElementById('fNome').value=novo?'':contatos[i][0];
-  document.getElementById('fTel').value=novo?'':contatos[i][1];
-  document.getElementById('bExcluir').style.display=novo?'none':'';
-  document.getElementById('erro').textContent='';
-  document.getElementById('fundo').classList.add('aberto');
-  setTimeout(()=>document.getElementById(novo||contatos[i][1]?'fNome':'fTel').focus(),50);
-}
-function fechar(){
-  document.getElementById('fundo').classList.remove('aberto');
-}
+function mensagem(){return ((cfg.texto||'')+(cfg.link?'\n'+cfg.link:'')).trim()}
+function linkZap(tel){return 'https://wa.me/55'+tel+'?text='+encodeURIComponent(mensagem())}
+function el(id){return document.getElementById(id)}
+function abrirModal(id){el(id).classList.add('aberto')}
+function fechar(id){el(id).classList.remove('aberto')}
+
 function salvar(){
-  const nome=document.getElementById('fNome').value.trim().replace(/\s+/g,' ');
-  const tel=soDigitos(document.getElementById('fTel').value);
-  const erro=document.getElementById('erro');
-  if(!nome){erro.textContent='Digite o nome.';return}
-  if(tel&&(tel.length<10||tel.length>11)){erro.textContent='O número deve ter DDD + 8 ou 9 dígitos.';return}
-  if(editando<0)contatos.push([nome,tel]);
-  else contatos[editando]=[nome,tel];
-  gravar();fechar();render();
+  tLocal=Date.now();
+  gravar(K.c,contatos);gravar(K.e,enviados);gravar(K.t,tLocal);gravar(K.cfg,cfg);
+  agendarEnvio();render();
+}
+
+/* ---------- lista ---------- */
+function passa(c,f){
+  if(f==='sem')return !c.tel;
+  if(f==='naoenv')return !!c.tel&&!enviados.includes(c.tel);
+  if(f==='env')return !!c.tel&&enviados.includes(c.tel);
+  if(f==='ret')return c.ret;
+  return true;
+}
+function listaVisivel(){
+  const q=el('q').value.toLowerCase().trim(),qd=q.replace(/\D/g,'');
+  const r=[];
+  contatos.forEach((c,i)=>{
+    if(!passa(c,filtro))return;
+    if(q&&!(c.nome.toLowerCase().includes(q)||(qd&&c.tel.includes(qd))))return;
+    r.push({c,i});
+  });
+  return r;
+}
+function render(){
+  sel.forEach(id=>{if(!contatos.some(c=>c.id===id))sel.delete(id)});
+  el('chips').innerHTML=FILTROS.map(f=>{
+    const n=contatos.filter(c=>passa(c,f[0])).length;
+    return `<button class="chip ${filtro===f[0]?'on':''}" onclick="setFiltro('${f[0]}')">${f[1]} (${n})</button>`;
+  }).join('');
+  let h='';
+  const vis=listaVisivel();
+  vis.forEach(({c,i})=>{
+    const env=c.tel&&enviados.includes(c.tel);
+    const tags=(env?'<span class="tag env">✓ enviado</span>':'')+(c.ret?'<span class="tag ret">RG retirado</span>':'');
+    const tel=c.tel
+      ?`<div class="tel">${esc(formatar(c.tel))}${tags?' ':''}${tags}</div>`
+      :`<div class="sem">Sem número cadastrado</div>${tags?`<div class="tel">${tags}</div>`:''}`;
+    const zap=c.tel
+      ?`<a class="btn zap" target="_blank" rel="noopener" href="${linkZap(c.tel)}" onclick="enviadoUm('${c.tel}')">${ICONE}WhatsApp</a>`
+      :`<button class="btn add" onclick="abrir('${c.id}')">Adicionar número</button>`;
+    const edit=c.tel?`<button class="btn edit" onclick="abrir('${c.id}')">Editar</button>`:'';
+    const ret=`<button class="btn ${c.ret?'desf':'retb'}" onclick="alternarRet('${c.id}')">${c.ret?'Desfazer retirado':'RG retirado'}</button>`;
+    h+=`<div class="card ${c.ret?'ret':''}"><div class="lado"><label class="sel"><input type="checkbox" ${sel.has(c.id)?'checked':''} onchange="alternarSel('${c.id}',this.checked)"></label><div class="num">${i+1}</div></div><div class="info"><div class="nome">${esc(c.nome)}</div>${tel}<div class="acoes">${zap}${edit}${ret}</div></div></div>`;
+  });
+  if(!vis.length)h='<div class="vazio">Nenhum nome encontrado.</div>';
+  el('lista').innerHTML=h;
+  resumo();atualizarBulk();
+}
+function resumo(){
+  const sem=contatos.filter(c=>!c.tel).length,ret=contatos.filter(c=>c.ret).length;
+  el('resumo').textContent=contatos.length+' nomes · '+sem+' sem número · '+ret+' com RG retirado'+(sel.size?' · '+sel.size+' marcados':'');
+}
+function setFiltro(f){filtro=f;render()}
+function alternarSel(id,on){if(on)sel.add(id);else sel.delete(id);resumo();atualizarBulk()}
+function marcarVisiveis(){listaVisivel().forEach(({c})=>sel.add(c.id));render()}
+function limparSel(){sel.clear();render()}
+function alternarRet(id){const c=contatos.find(x=>x.id===id);if(!c)return;c.ret=!c.ret;salvar()}
+function enviadoUm(tel){if(!enviados.includes(tel)){enviados.push(tel);setTimeout(salvar,400)}}
+
+/* ---------- cadastro / edição ---------- */
+function ajustarEnv(){const t=soDigitos(el('fTel').value);el('fEnv').disabled=!telValido(t);if(!telValido(t))el('fEnv').checked=false}
+function abrir(id){
+  editando=id;
+  const c=id?contatos.find(x=>x.id===id):null;
+  el('tituloModal').textContent=c?'Editar cadastro':'Novo cadastro';
+  el('fNome').value=c?c.nome:'';
+  el('fTel').value=c?c.tel:'';
+  el('fRet').checked=c?c.ret:false;
+  el('fEnv').checked=c?(!!c.tel&&enviados.includes(c.tel)):false;
+  ajustarEnv();
+  if(c)el('fEnv').checked=!!c.tel&&enviados.includes(c.tel);
+  el('bExcluir').style.display=c?'':'none';
+  el('erro').textContent='';
+  abrirModal('fundo');
+  setTimeout(()=>el(!c||c.tel?'fNome':'fTel').focus(),50);
+}
+function salvarContato(){
+  const nome=el('fNome').value.trim().replace(/\s+/g,' ');
+  const tel=soDigitos(el('fTel').value);
+  if(!nome){el('erro').textContent='Digite o nome.';return}
+  if(tel&&!telValido(tel)){el('erro').textContent='O número deve ter DDD + 8 ou 9 dígitos.';return}
+  let c=editando?contatos.find(x=>x.id===editando):null;
+  if(!c){c={id:novoId(),nome:'',tel:'',ret:false};contatos.push(c)}
+  c.nome=nome;c.tel=tel;c.ret=el('fRet').checked;
+  if(tel){
+    const i=enviados.indexOf(tel);
+    if(el('fEnv').checked&&i<0)enviados.push(tel);
+    if(!el('fEnv').checked&&i>=0)enviados.splice(i,1);
+  }
+  fechar('fundo');salvar();
 }
 function excluir(){
-  if(editando<0)return;
-  if(!confirm('Excluir "'+contatos[editando][0]+'"?'))return;
-  contatos.splice(editando,1);
-  gravar();fechar();render();
+  const c=contatos.find(x=>x.id===editando);
+  if(!c)return;
+  if(!confirm('Excluir "'+c.nome+'"?'))return;
+  contatos=contatos.filter(x=>x.id!==editando);
+  fechar('fundo');salvar();
 }
-function carregarEnv(){
-  try{const l=JSON.parse(localStorage.getItem(CHAVE_ENV));if(Array.isArray(l))return l}catch(e){}
-  return [];
+
+/* ---------- envio em fila ---------- */
+function alvoEnvio(){
+  const mapa=new Map();
+  const lista=sel.size
+    ?contatos.filter(c=>sel.has(c.id)&&c.tel)
+    :contatos.filter(c=>c.tel&&!c.ret&&!enviados.includes(c.tel));
+  lista.forEach(c=>{if(!mapa.has(c.tel))mapa.set(c.tel,[]);mapa.get(c.tel).push(c.nome)});
+  return [...mapa.entries()];
 }
-function gravarEnv(){
-  try{localStorage.setItem(CHAVE_ENV,JSON.stringify(enviados))}catch(e){}
-}
-function numerosUnicos(){
-  const m=new Map();
-  contatos.forEach(c=>{if(c[1]){if(!m.has(c[1]))m.set(c[1],[]);m.get(c[1]).push(c[0])}});
-  return m;
+function atualizarBulk(){
+  const n=alvoEnvio().length,b=el('bulk');
+  b.textContent=(sel.size?'Enviar para selecionados':'Enviar para todos pendentes')+' ('+n+')';
+  b.disabled=n===0;
 }
 function abrirFila(){
-  fila=[...numerosUnicos().entries()].filter(e=>!enviados.includes(e[0]));
-  pos=0;
-  document.getElementById('fundoFila').classList.add('aberto');
-  telaFila();
+  fila=alvoEnvio();pos=0;
+  el('filaTitulo').textContent=sel.size?'Enviar para selecionados':'Enviar para todos pendentes';
+  abrirModal('fundoFila');telaFila();
 }
-function fecharFila(){
-  document.getElementById('fundoFila').classList.remove('aberto');
-  render();
-}
+function fecharFila(){fechar('fundoFila');render()}
 function telaFila(){
-  const corpo=document.getElementById('filaCorpo'),bot=document.getElementById('filaBotoes');
+  const corpo=el('filaCorpo'),bot=el('filaBotoes');
   if(pos<fila.length){
-    const [num,nomes]=fila[pos];
-    const link='https://wa.me/55'+num+'?text='+encodeURIComponent(MENSAGEM());
+    const num=fila[pos][0],nomes=fila[pos][1];
     corpo.innerHTML=`<div class="fila-prog">${pos+1} de ${fila.length}</div><div class="fila-nome">${esc(nomes.join(', '))}</div><div class="fila-tel">${esc(formatar(num))}</div><div class="dica">Toque em Abrir WhatsApp, envie a mensagem e volte aqui para o próximo.</div>`;
-    bot.innerHTML=`<a class="btn zap" target="_blank" rel="noopener" href="${link}" onclick="enviado()">${ICONE}Abrir WhatsApp</a><button class="btn cancelar" onclick="pular()">Pular</button><button class="btn cancelar" onclick="fecharFila()">Fechar</button>`;
+    bot.innerHTML=`<a class="btn zap" target="_blank" rel="noopener" href="${linkZap(num)}" onclick="enviadoFila()">${ICONE}Abrir WhatsApp</a><button class="btn cancelar" onclick="pular()">Pular</button><button class="btn cancelar" onclick="fecharFila()">Fechar</button>`;
   }else{
-    corpo.innerHTML=`<div class="fila-nome">Fila concluída</div><div class="dica">${enviados.length} número(s) marcados como enviados.</div>`;
-    bot.innerHTML=`<button class="btn cancelar" onclick="recomecar()">Recomeçar do zero</button><button class="btn salvar" onclick="fecharFila()">Fechar</button>`;
+    corpo.innerHTML=`<div class="fila-nome">${fila.length?'Fila concluída':'Nada para enviar'}</div><div class="dica">${enviados.length} número(s) marcados como enviados.</div>`;
+    bot.innerHTML=`<button class="btn cancelar" onclick="recomecar()">Limpar marcação de enviados</button><button class="btn salvar" onclick="fecharFila()">Fechar</button>`;
   }
 }
-function enviado(){
+function enviadoFila(){
   const num=fila[pos][0];
   if(!enviados.includes(num))enviados.push(num);
-  gravarEnv();pos++;
-  setTimeout(telaFila,400);
+  pos++;
+  setTimeout(()=>{salvar();telaFila()},400);
 }
 function pular(){pos++;telaFila()}
 function recomecar(){
-  if(!confirm('Limpar a marcação de enviados e começar de novo?'))return;
-  enviados=[];gravarEnv();abrirFila();
+  if(!confirm('Limpar a marcação de enviados de todos?'))return;
+  enviados=[];salvar();abrirFila();
 }
-document.getElementById('fundo').addEventListener('click',e=>{if(e.target.id==='fundo')fechar()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')fechar()});
+
+/* ---------- importar lista ---------- */
+function abrirImport(){el('iTexto').value='';el('iMsg').textContent='';abrirModal('fundoImport')}
+function importar(){
+  const linhas=el('iTexto').value.split(/\r?\n/);
+  let novos=0,atual=0,dup=0,invalidos=0,semNome=0;
+  linhas.forEach(l=>{
+    l=l.trim();if(!l)return;
+    let tel='';
+    const m=l.match(/\+?\d[\d\s().-]{8,}\d/);
+    let nome=l;
+    if(m){
+      nome=l.replace(m[0],' ');
+      const t=soDigitos(m[0]);
+      if(telValido(t))tel=t;else invalidos++;
+    }
+    nome=nome.replace(/^[\s;,:|\-–—]+|[\s;,:|\-–—]+$/g,'').replace(/\s+/g,' ').slice(0,120);
+    if(!nome){semNome++;return}
+    const ex=contatos.find(c=>c.nome.toLowerCase()===nome.toLowerCase()&&(!c.tel||!tel||c.tel===tel));
+    if(ex){
+      if(!ex.tel&&tel){ex.tel=tel;atual++}else dup++;
+    }else{contatos.push({id:novoId(),nome,tel,ret:false});novos++}
+  });
+  if(novos||atual)salvar();
+  let t=novos+' novo(s) · '+atual+' número(s) preenchido(s) · '+dup+' repetido(s) ignorado(s)';
+  if(invalidos)t+='\n'+invalidos+' número(s) com tamanho inválido ficaram sem número';
+  if(semNome)t+='\n'+semNome+' linha(s) sem nome ignorada(s)';
+  el('iMsg').textContent=t;
+}
+
+/* ---------- backup ---------- */
+function baixarBackup(){
+  const dados={versao:1,contatos,enviados,texto:cfg.texto,link:cfg.link};
+  const blob=new Blob([JSON.stringify(dados,null,1)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='controle-rg-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+function restaurarBackup(inp){
+  const f=inp.files&&inp.files[0];
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      const lista=normalizar(d.contatos);
+      if(!lista.length)throw 0;
+      if(!confirm('Substituir a lista atual por '+lista.length+' nomes do backup?'))return;
+      contatos=lista;enviados=normEnv(d.enviados);
+      if(typeof d.texto==='string')cfg.texto=d.texto.slice(0,1000);
+      if(typeof d.link==='string')cfg.link=d.link.slice(0,500);
+      fechar('fundoAjustes');salvar();
+    }catch(e){alert('Arquivo de backup inválido.')}
+    inp.value='';
+  };
+  r.readAsText(f);
+}
+
+/* ---------- ajustes ---------- */
+function abrirAjustes(){
+  el('aTexto').value=cfg.texto;el('aLink').value=cfg.link;
+  el('aUrl').value=cfg.dbUrl;el('aCodigo').value=cfg.codigo;
+  el('aErro').textContent='';
+  status(syncAtivo()?'Sincronização ligada.':'Sincronização desligada.');
+  abrirModal('fundoAjustes');
+}
+function gerarCodigo(){
+  let s='';
+  try{const a=new Uint8Array(16);crypto.getRandomValues(a);s=[...a].map(b=>b.toString(36).padStart(2,'0')).join('')}
+  catch(e){for(let i=0;i<28;i++)s+=Math.floor(Math.random()*36).toString(36)}
+  el('aCodigo').value=s;
+}
+function salvarAjustes(){
+  const texto=el('aTexto').value.trim().slice(0,1000),link=el('aLink').value.trim().slice(0,500);
+  const url=el('aUrl').value.trim().replace(/\/+$/,''),codigo=el('aCodigo').value.trim();
+  const erro=el('aErro');
+  if(link&&!/^https?:\/\//i.test(link)){erro.textContent='O link do grupo deve começar com https://';return}
+  if(url||codigo){
+    if(!/^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.(firebaseio\.com|firebasedatabase\.app)$/i.test(url)){erro.textContent='Endereço do banco inválido. Ele termina em firebaseio.com ou firebasedatabase.app.';return}
+    if(!/^[A-Za-z0-9_-]{16,}$/.test(codigo)){erro.textContent='O código precisa ter pelo menos 16 letras ou números. Use "Gerar código".';return}
+  }
+  const mudouSync=url!==cfg.dbUrl||codigo!==cfg.codigo;
+  const mudouMsg=texto!==cfg.texto||link!==cfg.link;
+  cfg.texto=texto;cfg.link=link;cfg.dbUrl=url;cfg.codigo=codigo;
+  gravar(K.cfg,cfg);
+  fechar('fundoAjustes');
+  if(mudouMsg)salvar();else render();
+  if(mudouSync&&syncAtivo())primeiraSync();
+}
+
+/* ---------- sincronização ---------- */
+function syncAtivo(){return !!(cfg.dbUrl&&cfg.codigo)}
+function urlSync(){return cfg.dbUrl.replace(/\/+$/,'')+'/listas/'+encodeURIComponent(cfg.codigo)+'.json'}
+function status(t){const e=el('syncStatus');if(e)e.textContent=t}
+function hora(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+function pacote(){return {t:tLocal,contatos,enviados,texto:cfg.texto,link:cfg.link}}
+function agendarEnvio(){
+  if(!syncAtivo())return;
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(empurrar,1200);
+}
+async function empurrar(){
+  if(!syncAtivo())return;
+  try{
+    const r=await fetch(urlSync(),{method:'PUT',body:JSON.stringify(pacote())});
+    if(!r.ok)throw new Error('http');
+    status('Sincronizado às '+hora());
+  }catch(e){status('Sem conexão com o banco ('+hora()+')')}
+}
+function aplicarRemoto(d){
+  contatos=normalizar(d.contatos);
+  enviados=normEnv(d.enviados);
+  if(typeof d.texto==='string')cfg.texto=d.texto.slice(0,1000);
+  if(typeof d.link==='string')cfg.link=d.link.slice(0,500);
+  tLocal=Number(d.t)||Date.now();
+  gravar(K.c,contatos);gravar(K.e,enviados);gravar(K.t,tLocal);gravar(K.cfg,cfg);
+  render();
+}
+async function puxar(manual){
+  if(!syncAtivo()){if(manual)status('Preencha o endereço e o código e salve.');return}
+  try{
+    const r=await fetch(urlSync());
+    if(!r.ok)throw new Error('http');
+    const d=await r.json();
+    if(!d){await empurrar();return}
+    const tr=Number(d.t)||0;
+    if(tr>tLocal){aplicarRemoto(d);status('Atualizado às '+hora())}
+    else if(tr<tLocal)await empurrar();
+    else status('Sincronizado às '+hora());
+  }catch(e){status('Sem conexão com o banco ('+hora()+')')}
+}
+async function primeiraSync(){
+  try{
+    const r=await fetch(urlSync());
+    if(!r.ok)throw new Error('http');
+    const d=await r.json();
+    if(d&&Array.isArray(d.contatos)&&d.contatos.length){
+      const usar=confirm('Já existe uma lista online com esse código ('+d.contatos.length+' nomes).\n\nOK = usar a lista online neste aparelho.\nCancelar = substituir a lista online pela deste aparelho.');
+      if(usar){aplicarRemoto(d);return}
+    }
+    tLocal=Date.now();gravar(K.t,tLocal);
+    await empurrar();
+  }catch(e){status('Sem conexão com o banco ('+hora()+')');alert('Não consegui falar com o banco. Confira o endereço, as regras e a internet.')}
+}
+
+/* ---------- início ---------- */
+document.querySelectorAll('.fundo').forEach(f=>f.addEventListener('click',e=>{if(e.target===f)f.classList.remove('aberto')}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.fundo').forEach(f=>f.classList.remove('aberto'))});
+if(ler(K.c,null)===null){gravar(K.c,contatos);gravar(K.e,enviados)}
 render();
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+puxar();
+setInterval(puxar,20000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)puxar()});
 </script></body></html>
