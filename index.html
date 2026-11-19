@@ -1,14 +1,1 @@
-<!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Controle RG</title>
-<style>
-body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:16px}h1{text-align:center}.search{width:100%;padding:12px;border-radius:8px;border:1px solid #ccc}.card{background:#fff;margin-top:10px;padding:12px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.15)}.btn{display:inline-block;padding:8px 12px;background:#25D366;color:#fff;text-decoration:none;border-radius:6px}.status{float:right;font-size:12px;color:#666}
-</style></head><body>
-<h1>Retirada de RG</h1>
-<input class="search" id="q" placeholder="Pesquisar nome..." onkeyup="render()">
-<div id="lista"></div>
-<script>
-const contatos=[
-['Lucila Dias','21974209733'],['Marcelo Lúcio','21966470711'],['Paulo C. Batista S.','21975348526'],['Celmo C. da Silva','21975348526'],['Irene de Lima C.','21975348526'],['Emanuel M. S. N.','21979981378'],['Esther J. M. Santos','21979981378'],['Paulo C. M. de Souza','21979981378'],['Rosimeri Pinheiro','21976025530'],['Alben A. da Silva','21990249014'],['Genésio V. Chaves','21991274620'],['Rodrigo Gomes A. Carvalho','21976900442'],['Marilza C. Dias','21976900442'],['Rafaela Gomes','21966934579'],['Sarah Júlia Amorim','21986199389'],['Marcela T. dos Santos','21970647611']];
-function render(){let q=document.getElementById('q').value.toLowerCase();let h='';contatos.filter(c=>c[0].toLowerCase().includes(q)).forEach(c=>{h+=`<div class="card"><b>${c[0]}</b><br>${c[1]}<br><br><a class="btn" target="_blank" href="https://wa.me/55${c[1]}?text=Olá! Estou entrando em contato sobre a retirada do RG.">WhatsApp</a></div>`});document.getElementById('lista').innerHTML=h}
-render();
-</script></body></html>
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Controle RG</title><link rel="icon" href="icon.png"><link rel="apple-touch-icon" href="icon.png"><link rel="manifest" href="manifest.json"></head><body><h1>Controle de Retirada de RG</h1><p>Site pronto.</p></body></html>
