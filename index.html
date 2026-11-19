@@ -34,12 +34,19 @@ h1{text-align:center;margin:0 0 12px}
 .salvar{background:#111827}
 .cancelar{background:#6b7280}
 .excluir{background:#b91c1c;flex:none!important}
+.rodape{flex-wrap:wrap}
+.bulk{width:100%;margin-top:8px;padding:12px;border:0;border-radius:8px;background:#25D366;color:#fff;font-size:15px;cursor:pointer}
+.ok{color:#15803d;font-size:12px}
+.fila-prog{font-size:13px;color:#6b7280}
+.fila-nome{font-weight:bold;font-size:17px;margin:4px 0;word-break:break-word}
+.fila-tel{color:#4b5563}
 </style></head><body>
 <h1>Retirada de RG</h1>
 <div class="topo">
   <input class="search" id="q" placeholder="Pesquisar nome ou número..." oninput="render()">
   <button class="novo" onclick="abrir(-1)">+ Novo</button>
 </div>
+<button class="bulk" onclick="abrirFila()">Enviar para todos</button>
 <div class="resumo" id="resumo"></div>
 <div id="lista"></div>
 
@@ -60,14 +67,26 @@ h1{text-align:center;margin:0 0 12px}
   </div>
 </div>
 
+<div class="fundo" id="fundoFila">
+  <div class="modal">
+    <h2>Enviar para todos</h2>
+    <div id="filaCorpo"></div>
+    <div class="rodape" id="filaBotoes"></div>
+  </div>
+</div>
+
 <script>
 const CHAVE='controleRG_contatos';
 const LINK_GRUPO='https://chat.whatsapp.com/B4uXo65c01y4oKos58HPqH?s=cl&p=a&iam=2';
+const CHAVE_ENV='controleRG_enviados';
+function MENSAGEM(){return 'Olá! Estou entrando em contato sobre a retirada do RG.\nEntre nesse link para receber informações:\n'+LINK_GRUPO}
 const padrao=[
 ['Lucila Dias','21974209733'],['Marcelo Lúcio','21966470711'],['Paulo C. Batista S.','21975348526'],['Celmo C. da Silva','21975348526'],['Irene de Lima C.','21975348526'],['Emanuel M. S. N.','21979981378'],['Esther J. M. Santos','21979981378'],['Paulo C. M. de Souza','21979981378'],['Rosimeri Pinheiro','21976025530'],['Alben A. da Silva','21990249014'],['Genésio V. Chaves','21991274620'],['Rodrigo Gomes A. Carvalho','21976900442'],['Marilza C. Dias','21976900442'],['Rafaela Gomes','21966934579'],['Sarah Júlia Amorim','21986199389'],['Marcela T. dos Santos','21970647611']];
 
 let contatos=carregar();
 let editando=-1;
+let enviados=carregarEnv();
+let fila=[],pos=0;
 
 function carregar(){
   try{
@@ -103,9 +122,9 @@ function render(){
     const ok=!q||nome.includes(q)||(qd&&c[1].includes(qd));
     if(!ok)return;
     achados++;
-    const msg=encodeURIComponent('Olá! Estou entrando em contato sobre a retirada do RG.\nEntre nesse link para receber informações:\n'+LINK_GRUPO);
+    const msg=encodeURIComponent(MENSAGEM());
     const tel=c[1]
-      ?`<div class="tel">${esc(formatar(c[1]))}</div>`
+      ?`<div class="tel">${esc(formatar(c[1]))}${enviados.includes(c[1])?' <span class="ok">✓ enviado</span>':''}</div>`
       :`<div class="sem">Sem número cadastrado</div>`;
     const zap=c[1]
       ?`<a class="btn zap" target="_blank" rel="noopener" href="https://wa.me/55${c[1]}?text=${msg}">${ICONE}WhatsApp</a>`
@@ -148,6 +167,51 @@ function excluir(){
   if(!confirm('Excluir "'+contatos[editando][0]+'"?'))return;
   contatos.splice(editando,1);
   gravar();fechar();render();
+}
+function carregarEnv(){
+  try{const l=JSON.parse(localStorage.getItem(CHAVE_ENV));if(Array.isArray(l))return l}catch(e){}
+  return [];
+}
+function gravarEnv(){
+  try{localStorage.setItem(CHAVE_ENV,JSON.stringify(enviados))}catch(e){}
+}
+function numerosUnicos(){
+  const m=new Map();
+  contatos.forEach(c=>{if(c[1]){if(!m.has(c[1]))m.set(c[1],[]);m.get(c[1]).push(c[0])}});
+  return m;
+}
+function abrirFila(){
+  fila=[...numerosUnicos().entries()].filter(e=>!enviados.includes(e[0]));
+  pos=0;
+  document.getElementById('fundoFila').classList.add('aberto');
+  telaFila();
+}
+function fecharFila(){
+  document.getElementById('fundoFila').classList.remove('aberto');
+  render();
+}
+function telaFila(){
+  const corpo=document.getElementById('filaCorpo'),bot=document.getElementById('filaBotoes');
+  if(pos<fila.length){
+    const [num,nomes]=fila[pos];
+    const link='https://wa.me/55'+num+'?text='+encodeURIComponent(MENSAGEM());
+    corpo.innerHTML=`<div class="fila-prog">${pos+1} de ${fila.length}</div><div class="fila-nome">${esc(nomes.join(', '))}</div><div class="fila-tel">${esc(formatar(num))}</div><div class="dica">Toque em Abrir WhatsApp, envie a mensagem e volte aqui para o próximo.</div>`;
+    bot.innerHTML=`<a class="btn zap" target="_blank" rel="noopener" href="${link}" onclick="enviado()">${ICONE}Abrir WhatsApp</a><button class="btn cancelar" onclick="pular()">Pular</button><button class="btn cancelar" onclick="fecharFila()">Fechar</button>`;
+  }else{
+    corpo.innerHTML=`<div class="fila-nome">Fila concluída</div><div class="dica">${enviados.length} número(s) marcados como enviados.</div>`;
+    bot.innerHTML=`<button class="btn cancelar" onclick="recomecar()">Recomeçar do zero</button><button class="btn salvar" onclick="fecharFila()">Fechar</button>`;
+  }
+}
+function enviado(){
+  const num=fila[pos][0];
+  if(!enviados.includes(num))enviados.push(num);
+  gravarEnv();pos++;
+  setTimeout(telaFila,400);
+}
+function pular(){pos++;telaFila()}
+function recomecar(){
+  if(!confirm('Limpar a marcação de enviados e começar de novo?'))return;
+  enviados=[];gravarEnv();abrirFila();
 }
 document.getElementById('fundo').addEventListener('click',e=>{if(e.target.id==='fundo')fechar()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')fechar()});
