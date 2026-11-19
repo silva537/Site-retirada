@@ -64,6 +64,12 @@ h1{text-align:center;margin:0 0 12px}
 .fila-prog{font-size:13px;color:#6b7280}
 .fila-nome{font-weight:bold;font-size:17px;margin:4px 0;word-break:break-word}
 .fila-tel{color:#4b5563}
+.rodape-site{text-align:center;font-size:12px;color:#6b7280;margin:24px 0 8px}
+.rodape-site button{background:none;border:0;color:#2563eb;font-size:12px;text-decoration:underline;cursor:pointer;padding:0}
+.termos{font-size:13px;color:#374151;line-height:1.45}
+.termos h3{margin:14px 0 4px;font-size:14px;color:#111827}
+.termos p,.termos ul{margin:4px 0}
+.termos ul{padding-left:18px}
 details{margin-top:8px;font-size:12px;color:#4b5563}
 pre{background:#f3f4f6;padding:8px;border-radius:6px;white-space:pre-wrap;word-break:break-all;font-size:11px}
 </style></head><body>
@@ -83,6 +89,7 @@ pre{background:#f3f4f6;padding:8px;border-radius:6px;white-space:pre-wrap;word-b
 <div class="ajuda">Sem ninguém marcado: abre o WhatsApp, um contato por vez, de quem tem número, ainda não recebeu a mensagem e não retirou o RG. Com nomes marcados: envia só a eles. Para falar com uma pessoa só, use o botão WhatsApp no nome dela.</div>
 <div class="resumo" id="resumo"></div>
 <div id="lista"></div>
+<div class="rodape-site">Feito por Vitor Silva · <button onclick="abrirModal('fundoTermos')">Termos de uso e privacidade</button></div>
 
 <!-- Cadastro / edição -->
 <div class="fundo" id="fundo"><div class="modal">
@@ -163,6 +170,48 @@ pre{background:#f3f4f6;padding:8px;border-radius:6px;white-space:pre-wrap;word-b
     <button class="btn cancelar" onclick="fechar('fundoAjustes')">Cancelar</button>
     <button class="btn salvar" onclick="salvarAjustes()">Salvar</button>
   </div>
+</div></div>
+
+<!-- Termos de uso e privacidade -->
+<div class="fundo" id="fundoTermos"><div class="modal">
+  <h2>Termos de uso e privacidade</h2>
+  <div class="termos">
+    <p>Controle RG · feito por Vitor Silva · atualizado em 19/11/2026.</p>
+
+    <h3>1. Para que serve</h3>
+    <p>Este site organiza uma lista de nomes e telefones para avisar as pessoas sobre a retirada do RG. Ele não deve ser usado para outra finalidade.</p>
+
+    <h3>2. Dados tratados</h3>
+    <p>Nome, telefone e marcações feitas por quem usa (se o RG foi retirado e se a mensagem foi enviada).</p>
+
+    <h3>3. Onde os dados ficam</h3>
+    <p>Ficam no navegador do aparelho de quem usa. Se a sincronização for ligada em Ajustes, também ficam no banco do Firebase configurado por quem a ligou. O site não envia esses dados ao autor.</p>
+
+    <h3>4. Leis do Brasil</h3>
+    <ul>
+      <li><b>LGPD (Lei nº 13.709/2018):</b> os dados pessoais só podem ser usados para uma finalidade clara e informada, apenas no necessário, com segurança e transparência, e só quando houver uma base legal, como o consentimento da pessoa (art. 7º).</li>
+      <li><b>Marco Civil da Internet (Lei nº 12.965/2014):</b> protege a privacidade e os dados pessoais no uso da internet.</li>
+      <li><b>Constituição Federal, art. 5º, X:</b> garante a intimidade e a vida privada.</li>
+    </ul>
+
+    <h3>5. Responsabilidade de quem cadastra</h3>
+    <p>Quem cadastra nomes e telefones é o responsável por esses dados e deve ter autorização das pessoas para contatá-las. Só cadastre quem pediu ou aceitou receber o aviso.</p>
+
+    <h3>6. Direitos das pessoas cadastradas</h3>
+    <p>Conforme o art. 18 da LGPD, a pessoa pode pedir para confirmar o uso dos seus dados, ver, corrigir, excluir ou retirar a autorização. Basta falar com quem mantém a lista, que pode corrigir ou excluir o cadastro no próprio site (botão Editar).</p>
+
+    <h3>7. Mensagens</h3>
+    <p>Envie apenas o aviso combinado e pare de enviar a quem pedir. Não use o site para spam ou propaganda. O WhatsApp também tem regras próprias que podem bloquear contas que enviam mensagens em excesso.</p>
+
+    <h3>8. Segurança</h3>
+    <p>Não compartilhe arquivos de backup, o endereço do banco nem o código da lista com quem não deve ver os dados. Proteja o aparelho com senha ou biometria.</p>
+
+    <h3>9. Sem garantias</h3>
+    <p>O site é oferecido como está, sem garantia de funcionamento contínuo. Faça backups com frequência. Quem usa responde pelo uso que faz.</p>
+
+    <p class="dica" style="margin-top:12px">Este texto é informativo e não substitui orientação de um advogado.</p>
+  </div>
+  <div class="rodape"><button class="btn salvar" onclick="fechar('fundoTermos')">Fechar</button></div>
 </div></div>
 
 <script>
