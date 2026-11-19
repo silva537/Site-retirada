@@ -1,14 +1,154 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Controle RG</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:16px}h1{text-align:center}.search{width:100%;padding:12px;border-radius:8px;border:1px solid #ccc}.card{background:#fff;margin-top:10px;padding:12px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.15)}.btn{display:inline-block;padding:8px 12px;background:#25D366;color:#fff;text-decoration:none;border-radius:6px}.status{float:right;font-size:12px;color:#666}
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:16px;color:#1f2937}
+h1{text-align:center;margin:0 0 12px}
+.topo{display:flex;gap:8px;margin-bottom:4px}
+.search{flex:1;min-width:0;padding:12px;border-radius:8px;border:1px solid #ccc;font-size:16px}
+.novo{padding:0 14px;border:0;border-radius:8px;background:#111827;color:#fff;font-size:15px;cursor:pointer;white-space:nowrap}
+.resumo{font-size:13px;color:#6b7280;margin:8px 2px}
+.card{background:#fff;margin-top:10px;padding:12px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.15);display:flex;gap:12px;align-items:flex-start}
+.num{flex:none;min-width:34px;height:34px;border-radius:17px;background:#e5e7eb;color:#374151;font-weight:bold;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.info{flex:1;min-width:0}
+.nome{font-weight:bold;word-break:break-word}
+.tel{margin-top:2px;color:#4b5563}
+.sem{margin-top:2px;color:#b45309;font-style:italic}
+.acoes{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:0;border-radius:6px;font-size:14px;text-decoration:none;cursor:pointer;color:#fff}
+.zap{background:#25D366}
+.zap svg{width:18px;height:18px;fill:#fff}
+.edit{background:#2563eb}
+.add{background:#b45309}
+.vazio{text-align:center;color:#6b7280;margin-top:24px}
+.fundo{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.fundo.aberto{display:flex}
+.modal{background:#fff;border-radius:12px;padding:16px;width:100%;max-width:380px}
+.modal h2{margin:0 0 12px;font-size:18px}
+.modal label{display:block;font-size:13px;color:#4b5563;margin:10px 0 4px}
+.modal input{width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+.dica{font-size:12px;color:#6b7280;margin-top:4px}
+.erro{color:#b91c1c;font-size:13px;margin-top:8px;min-height:16px}
+.rodape{display:flex;gap:8px;margin-top:12px}
+.rodape .btn{flex:1;justify-content:center}
+.salvar{background:#111827}
+.cancelar{background:#6b7280}
+.excluir{background:#b91c1c;flex:none!important}
 </style></head><body>
 <h1>Retirada de RG</h1>
-<input class="search" id="q" placeholder="Pesquisar nome..." onkeyup="render()">
+<div class="topo">
+  <input class="search" id="q" placeholder="Pesquisar nome ou número..." oninput="render()">
+  <button class="novo" onclick="abrir(-1)">+ Novo</button>
+</div>
+<div class="resumo" id="resumo"></div>
 <div id="lista"></div>
+
+<div class="fundo" id="fundo">
+  <div class="modal">
+    <h2 id="tituloModal">Novo cadastro</h2>
+    <label for="fNome">Nome</label>
+    <input id="fNome" autocomplete="off">
+    <label for="fTel">Número (com DDD)</label>
+    <input id="fTel" type="tel" inputmode="numeric" placeholder="21999999999" autocomplete="off">
+    <div class="dica">Pode deixar em branco e adicionar o número depois.</div>
+    <div class="erro" id="erro"></div>
+    <div class="rodape">
+      <button class="btn excluir" id="bExcluir" onclick="excluir()">Excluir</button>
+      <button class="btn cancelar" onclick="fechar()">Cancelar</button>
+      <button class="btn salvar" onclick="salvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const contatos=[
+const CHAVE='controleRG_contatos';
+const padrao=[
 ['Lucila Dias','21974209733'],['Marcelo Lúcio','21966470711'],['Paulo C. Batista S.','21975348526'],['Celmo C. da Silva','21975348526'],['Irene de Lima C.','21975348526'],['Emanuel M. S. N.','21979981378'],['Esther J. M. Santos','21979981378'],['Paulo C. M. de Souza','21979981378'],['Rosimeri Pinheiro','21976025530'],['Alben A. da Silva','21990249014'],['Genésio V. Chaves','21991274620'],['Rodrigo Gomes A. Carvalho','21976900442'],['Marilza C. Dias','21976900442'],['Rafaela Gomes','21966934579'],['Sarah Júlia Amorim','21986199389'],['Marcela T. dos Santos','21970647611']];
-function render(){let q=document.getElementById('q').value.toLowerCase();let h='';contatos.filter(c=>c[0].toLowerCase().includes(q)).forEach(c=>{h+=`<div class="card"><b>${c[0]}</b><br>${c[1]}<br><br><a class="btn" target="_blank" href="https://wa.me/55${c[1]}?text=Olá! Estou entrando em contato sobre a retirada do RG.">WhatsApp</a></div>`});document.getElementById('lista').innerHTML=h}
+
+let contatos=carregar();
+let editando=-1;
+
+function carregar(){
+  try{
+    const s=localStorage.getItem(CHAVE);
+    if(s){const l=JSON.parse(s);if(Array.isArray(l))return l}
+  }catch(e){}
+  return padrao.map(c=>[c[0],c[1]]);
+}
+function gravar(){
+  try{localStorage.setItem(CHAVE,JSON.stringify(contatos))}catch(e){}
+}
+function esc(t){
+  return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function soDigitos(t){
+  let d=String(t||'').replace(/\D/g,'');
+  if(d.length>11&&d.startsWith('55'))d=d.slice(2);
+  return d;
+}
+function formatar(d){
+  if(d.length===11)return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if(d.length===10)return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return d;
+}
+const ICONE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#25D366" d="M8.6 7.5c-.6 0-1.1.5-1.1 1.400 0 3.200 3.400 6.600 6.700 6.700.9 0 1.400-.5 1.400-1.100l-.1-.8-1.800-.8-.8.9c-1.100-.5-2.100-1.500-2.600-2.600l.9-.8-.8-1.800z"/></svg>';
+
+function render(){
+  const q=document.getElementById('q').value.toLowerCase().trim();
+  const qd=q.replace(/\D/g,'');
+  let h='',achados=0;
+  contatos.forEach((c,i)=>{
+    const nome=c[0].toLowerCase();
+    const ok=!q||nome.includes(q)||(qd&&c[1].includes(qd));
+    if(!ok)return;
+    achados++;
+    const msg=encodeURIComponent('Olá! Estou entrando em contato sobre a retirada do RG.');
+    const tel=c[1]
+      ?`<div class="tel">${esc(formatar(c[1]))}</div>`
+      :`<div class="sem">Sem número cadastrado</div>`;
+    const zap=c[1]
+      ?`<a class="btn zap" target="_blank" rel="noopener" href="https://wa.me/55${c[1]}?text=${msg}">${ICONE}WhatsApp</a>`
+      :`<button class="btn add" onclick="abrir(${i})">Adicionar número</button>`;
+    const edit=c[1]?`<button class="btn edit" onclick="abrir(${i})">Editar</button>`:'';
+    h+=`<div class="card"><div class="num">${i+1}</div><div class="info"><div class="nome">${esc(c[0])}</div>${tel}<div class="acoes">${zap}${edit}</div></div></div>`;
+  });
+  if(!achados)h='<div class="vazio">Nenhum nome encontrado.</div>';
+  const sem=contatos.filter(c=>!c[1]).length;
+  document.getElementById('resumo').textContent=contatos.length+' nomes'+(sem?' · '+sem+' sem número':'');
+  document.getElementById('lista').innerHTML=h;
+}
+
+function abrir(i){
+  editando=i;
+  const novo=i<0;
+  document.getElementById('tituloModal').textContent=novo?'Novo cadastro':'Editar cadastro';
+  document.getElementById('fNome').value=novo?'':contatos[i][0];
+  document.getElementById('fTel').value=novo?'':contatos[i][1];
+  document.getElementById('bExcluir').style.display=novo?'none':'';
+  document.getElementById('erro').textContent='';
+  document.getElementById('fundo').classList.add('aberto');
+  setTimeout(()=>document.getElementById(novo||contatos[i][1]?'fNome':'fTel').focus(),50);
+}
+function fechar(){
+  document.getElementById('fundo').classList.remove('aberto');
+}
+function salvar(){
+  const nome=document.getElementById('fNome').value.trim().replace(/\s+/g,' ');
+  const tel=soDigitos(document.getElementById('fTel').value);
+  const erro=document.getElementById('erro');
+  if(!nome){erro.textContent='Digite o nome.';return}
+  if(tel&&(tel.length<10||tel.length>11)){erro.textContent='O número deve ter DDD + 8 ou 9 dígitos.';return}
+  if(editando<0)contatos.push([nome,tel]);
+  else contatos[editando]=[nome,tel];
+  gravar();fechar();render();
+}
+function excluir(){
+  if(editando<0)return;
+  if(!confirm('Excluir "'+contatos[editando][0]+'"?'))return;
+  contatos.splice(editando,1);
+  gravar();fechar();render();
+}
+document.getElementById('fundo').addEventListener('click',e=>{if(e.target.id==='fundo')fechar()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fechar()});
 render();
 </script></body></html>
