@@ -62,6 +62,7 @@ h1{text-align:center;margin:0 0 12px}
 
 <script>
 const CHAVE='controleRG_contatos';
+const LINK_GRUPO='https://chat.whatsapp.com/B4uXo65c01y4oKos58HPqH?s=cl&p=a&iam=2';
 const padrao=[
 ['Lucila Dias','21974209733'],['Marcelo Lúcio','21966470711'],['Paulo C. Batista S.','21975348526'],['Celmo C. da Silva','21975348526'],['Irene de Lima C.','21975348526'],['Emanuel M. S. N.','21979981378'],['Esther J. M. Santos','21979981378'],['Paulo C. M. de Souza','21979981378'],['Rosimeri Pinheiro','21976025530'],['Alben A. da Silva','21990249014'],['Genésio V. Chaves','21991274620'],['Rodrigo Gomes A. Carvalho','21976900442'],['Marilza C. Dias','21976900442'],['Rafaela Gomes','21966934579'],['Sarah Júlia Amorim','21986199389'],['Marcela T. dos Santos','21970647611']];
 
@@ -102,7 +103,7 @@ function render(){
     const ok=!q||nome.includes(q)||(qd&&c[1].includes(qd));
     if(!ok)return;
     achados++;
-    const msg=encodeURIComponent('Olá! Estou entrando em contato sobre a retirada do RG.');
+    const msg=encodeURIComponent('Olá! Estou entrando em contato sobre a retirada do RG.\nEntre nesse link para receber informações:\n'+LINK_GRUPO);
     const tel=c[1]
       ?`<div class="tel">${esc(formatar(c[1]))}</div>`
       :`<div class="sem">Sem número cadastrado</div>`;
