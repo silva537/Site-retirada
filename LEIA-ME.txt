@@ -1,0 +1,27 @@
+CONTROLE RG - pacote completo (atualização 001)
+Feito por Vitor Silva
+
+PARA A VERSÃO PRINCIPAL (suba estes 5 no GitHub, na raiz do repositório):
+  index.html
+  manifest.json
+  sw.js
+  icon-192.png
+  icon-512.png
+
+OPCIONAL:
+  index-teste.html
+      Versão de teste, para experimentar novidades antes de passar para a
+      principal. Usa dados separados (não mexe nos da principal).
+  extras/index-anterior.html
+      Cópia de segurança da versão antiga (000). NÃO suba no site: ela
+      não conhece os campos novos (grupo, observações, "não quer receber")
+      e pode apagá-los dos cadastros se for aberta.
+
+IMPORTANTE:
+  - Nenhum arquivo deste pacote tem nomes ou telefones. A lista vem vazia:
+    use "Importar lista" ou "Restaurar backup" depois de publicar.
+  - Quem já usava a versão principal anterior no mesmo endereço mantém os
+    dados: nomes, números, "enviado", mensagem e link são aproveitados.
+  - O link do grupo do WhatsApp vem preenchido nos arquivos. Troque em
+    Ajustes se quiser, e deixe o repositório como Private.
+  - Faça um backup (Ajustes > Salvar backup) antes e depois de atualizar.
