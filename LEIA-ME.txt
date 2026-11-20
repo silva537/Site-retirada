@@ -1,7 +1,8 @@
-CONTROLE RG - pacote completo (atualização 001)
+CONTROLE RG - pacote completo
 Feito por Vitor Silva
+Versão principal: atualização 001 | Versão de teste: atualização 002
 
-PARA A VERSÃO PRINCIPAL (suba estes 5 no GitHub, na raiz do repositório):
+PARA A VERSÃO PRINCIPAL (suba estes arquivos no GitHub, na raiz do repositório):
   index.html
   manifest.json
   sw.js
@@ -10,18 +11,35 @@ PARA A VERSÃO PRINCIPAL (suba estes 5 no GitHub, na raiz do repositório):
 
 OPCIONAL:
   index-teste.html
-      Versão de teste, para experimentar novidades antes de passar para a
-      principal. Usa dados separados (não mexe nos da principal).
+      Versão de teste (atualização 002: MODO MANUTENÇÃO). Usa dados separados
+      (não mexe nos da principal). Quando estiver aprovada, peça para passar
+      as novidades para a principal.
+  manutencao.json
+      Arquivo que liga a manutenção para TODOS os visitantes. Hoje só a versão
+      de teste lê este arquivo. Fica com "ativo": false (site liberado).
   extras/index-anterior.html
       Cópia de segurança da versão antiga (000). NÃO suba no site: ela
       não conhece os campos novos (grupo, observações, "não quer receber")
       e pode apagá-los dos cadastros se for aberta.
 
+COMO USAR O MODO MANUTENÇÃO (versão de teste):
+  1) Ajustes > Modo manutenção: escreva a mensagem, escolha a data e hora
+     de liberação, digite a senha e toque em "Ativar manutenção".
+     Vale neste aparelho (e nos sincronizados, se a sincronização estiver ligada).
+  2) Para bloquear TODOS os visitantes: em Ajustes, toque em "Gerar
+     manutencao.json", copie o texto e cole no arquivo manutencao.json do
+     GitHub (substituindo tudo). Para desligar, troque "ativo": true por false.
+  3) A manutenção termina sozinha quando o tempo acaba, ou com a senha.
+  4) Troque a senha padrão em Ajustes. A troca vale só no aparelho em que foi
+     feita; o arquivo manutencao.json leva a senha em forma de hash.
+
+AVISO: é uma tela de aviso, não uma proteção forte. Quem sabe mexer no
+navegador consegue contornar. Não guarde nada secreto dependendo dela.
+
 IMPORTANTE:
   - Nenhum arquivo deste pacote tem nomes ou telefones. A lista vem vazia:
     use "Importar lista" ou "Restaurar backup" depois de publicar.
-  - Quem já usava a versão principal anterior no mesmo endereço mantém os
-    dados: nomes, números, "enviado", mensagem e link são aproveitados.
-  - O link do grupo do WhatsApp vem preenchido nos arquivos. Troque em
-    Ajustes se quiser, e deixe o repositório como Private.
+  - O link do grupo do WhatsApp vem preenchido. Troque em Ajustes se quiser,
+    e deixe o repositório como Private.
+  - O sw.js mudou (versão v3): suba também o sw.js novo.
   - Faça um backup (Ajustes > Salvar backup) antes e depois de atualizar.

@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#b45309">
+<meta name="robots" content="noindex">
+<title>Controle RG (TESTE)</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:16px;color:#1f2937}
+h1{text-align:center;margin:0 0 12px}
+.teste{background:#fef3c7;color:#92400e;border:1px solid #f59e0b;border-radius:8px;padding:8px 10px;font-size:13px;text-align:center;margin-bottom:12px}
+.topo{display:flex;gap:8px}
+.search{flex:1;min-width:0;padding:12px;border-radius:8px;border:1px solid #ccc;font-size:16px}
+.novo{padding:0 14px;border:0;border-radius:8px;background:#111827;color:#fff;font-size:15px;cursor:pointer;white-space:nowrap}
+.painel{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.kpi{background:#fff;border-radius:10px;padding:10px 6px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.kpi b{display:block;font-size:20px}
+.kpi span{font-size:11px;color:#6b7280}
+.barra{grid-column:1/-1;background:#e5e7eb;border-radius:8px;height:12px;overflow:hidden}
+.barra div{height:100%;background:#15803d}
+.barra-txt{grid-column:1/-1;font-size:12px;color:#6b7280;text-align:center;margin-top:-2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px}
+.chip{flex:none;padding:7px 12px;border-radius:16px;border:1px solid #d1d5db;background:#fff;font-size:13px;cursor:pointer}
+.chip.on{background:#111827;color:#fff;border-color:#111827}
+.linha{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.mini{padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;background:#fff;font-size:13px;cursor:pointer}
+.bulk{width:100%;margin-top:10px;padding:12px;border:0;border-radius:8px;background:#25D366;color:#fff;font-size:15px;cursor:pointer}
+.bulk:disabled{opacity:.5;cursor:default}
+.ajuda{font-size:12px;color:#6b7280;margin:6px 2px 0}
+.resumo{font-size:13px;color:#6b7280;margin:10px 2px 0}
+.card{background:#fff;margin-top:10px;padding:12px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.15);display:flex;gap:12px;align-items:flex-start}
+.card.ret{opacity:.65}
+.card.nr{background:#fef2f2}
+.lado{display:flex;flex-direction:column;align-items:center;gap:8px}
+.sel input{width:20px;height:20px}
+.num{flex:none;min-width:34px;height:34px;border-radius:17px;background:#e5e7eb;color:#374151;font-weight:bold;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.info{flex:1;min-width:0}
+.nome{font-weight:bold;word-break:break-word}
+.tel{margin-top:2px;color:#4b5563}
+.sem{margin-top:2px;color:#b45309;font-style:italic}
+.obs{margin-top:4px;font-size:13px;color:#4b5563;font-style:italic;word-break:break-word}
+.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin:2px 4px 0 0;font-style:normal}
+.tag.env{background:#dbeafe;color:#1e40af}
+.tag.ret{background:#dcfce7;color:#166534}
+.tag.nr{background:#fee2e2;color:#991b1b}
+.tag.bloq{background:#e5e7eb;color:#374151}
+.acoes{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:0;border-radius:6px;font-size:14px;text-decoration:none;cursor:pointer;color:#fff}
+.zap{background:#25D366}
+.zap svg{width:18px;height:18px;fill:#fff}
+.edit{background:#2563eb}
+.add{background:#b45309}
+.retb{background:#15803d}
+.desf{background:#6b7280}
+.nrb{background:#b91c1c}
+.vazio{text-align:center;color:#6b7280;margin-top:24px}
+.fundo{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.fundo.aberto{display:flex}
+.modal{background:#fff;border-radius:12px;padding:16px;width:100%;max-width:400px;max-height:90vh;overflow:auto}
+.modal h2{margin:0 0 12px;font-size:18px}
+.modal h3{margin:16px 0 4px;font-size:15px}
+.modal label{display:block;font-size:13px;color:#4b5563;margin:10px 0 4px}
+.modal label.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:#1f2937;margin:12px 0 0}
+.modal label.chk input{width:20px;height:20px}
+.modal input:not([type=checkbox]),.modal textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;font-size:16px;font-family:inherit}
+.modal textarea{min-height:90px;resize:vertical}
+.dica{font-size:12px;color:#6b7280;margin-top:4px}
+.erro{color:#b91c1c;font-size:13px;margin-top:8px;min-height:16px}
+.msgok{font-size:13px;color:#166534;margin-top:8px;white-space:pre-line}
+.previa{font-size:13px;background:#f3f4f6;border-radius:8px;padding:8px;white-space:pre-wrap;word-break:break-word;margin-top:6px}
+.rodape{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.rodape .btn{flex:1;justify-content:center}
+.salvar{background:#111827}
+.cancelar{background:#6b7280}
+.excluir{background:#b91c1c;flex:none!important}
+.fila-prog{font-size:13px;color:#6b7280}
+.fila-nome{font-weight:bold;font-size:17px;margin:4px 0;word-break:break-word}
+.fila-tel{color:#4b5563}
+details{margin-top:8px;font-size:12px;color:#4b5563}
+pre{background:#f3f4f6;padding:8px;border-radius:6px;white-space:pre-wrap;word-break:break-all;font-size:11px}
+.rodape-site{text-align:center;font-size:12px;color:#6b7280;margin:24px 0 8px;line-height:1.8}
+.rodape-site button{background:none;border:0;color:#2563eb;font-size:12px;text-decoration:underline;cursor:pointer;padding:0}
+.termos{font-size:13px;color:#374151;line-height:1.45}
+.termos h3{margin:14px 0 4px;font-size:14px;color:#111827}
+.termos p,.termos ul{margin:4px 0}
+.termos ul{padding-left:18px}
+.novid h3{margin:12px 0 4px}
+.novid ul{margin:4px 0;padding-left:18px;font-size:13px}
+#bloqueio{position:fixed;inset:0;background:#111827;z-index:100;align-items:center;justify-content:center;padding:16px;display:none}
+.bl-box{background:#fff;border-radius:12px;padding:20px;width:100%;max-width:320px}
+.bl-box h2{margin:0 0 6px;font-size:18px}
+.bl-box input{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:20px;text-align:center;letter-spacing:6px;margin-top:8px}
+.sel2{padding:8px;border:1px solid #d1d5db;border-radius:6px;background:#fff;font-size:13px;max-width:100%}
+.modelo{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:#4b5563}
+.modelo select{flex:1;min-width:0}
+.btn.peq{padding:6px 9px;font-size:13px}
+.lig{background:#4b5563}
+.tag.gr{background:#ede9fe;color:#5b21b6}
+.aviso{font-size:12px;color:#b45309;margin-top:6px;min-height:0}
+.lixitem{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e5e7eb}
+.lixitem .mini{margin-left:4px}
+#toast{position:fixed;left:16px;right:16px;bottom:16px;max-width:420px;margin:0 auto;background:#111827;color:#fff;border-radius:10px;padding:10px 14px;display:none;align-items:center;justify-content:space-between;gap:10px;font-size:14px;z-index:50}
+#toast button{background:#fff;color:#111827;border:0;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer}
+#impressao{display:none}
+@page{margin:12mm}
+@media print{
+  body{background:#fff;padding:0}
+  #app,#bloqueio,#toast{display:none!important}
+  #impressao{display:block;color:#000;font-family:Arial,sans-serif}
+  #impressao table{width:100%;border-collapse:collapse;font-size:12px}
+  #impressao th,#impressao td{border:1px solid #999;padding:4px 6px;text-align:left}
+  #impressao .cx{text-align:center;width:50px}
+  #impressao .peq{font-size:10px;color:#555;margin-top:10px}
+}
+#manutencao{position:fixed;inset:0;background:#111827;z-index:200;display:none;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.mn-box{background:#fff;border-radius:12px;padding:24px 20px;width:100%;max-width:360px;text-align:center}
+.mn-ico{font-size:34px}
+.mn-box h2{margin:6px 0}
+.mn-box p{color:#4b5563;margin:6px 0 10px}
+.mn-tempo{font-size:30px;font-weight:bold;font-variant-numeric:tabular-nums;margin:10px 0 4px}
+.mn-adm{margin-top:18px;text-align:left}
+.mn-adm summary{cursor:pointer;color:#6b7280;font-size:13px;text-align:center}
+.mn-adm input{width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;font-size:16px;margin-top:10px}
+</style></head><body>
+
+<div id="manutencao"><div class="mn-box">
+  <div class="mn-ico">🔧</div>
+  <h2>Site em manutenção</h2>
+  <p id="mTexto"></p>
+  <div class="mn-tempo" id="mTempo"></div>
+  <div class="dica" id="mPrev"></div>
+  <details class="mn-adm"><summary>Acesso do administrador</summary>
+    <input id="mSenha" type="password" autocomplete="off" placeholder="Senha" onkeydown="if(event.key==='Enter')manutEntrar()">
+    <div class="erro" id="mErro"></div>
+    <button class="btn salvar" id="mAdmBtn" style="width:100%;justify-content:center" onclick="manutEntrar()">Entrar</button>
+  </details>
+</div></div>
+
+<div id="bloqueio"><div class="bl-box">
+  <h2>Controle RG (teste)</h2>
+  <div class="dica">Digite o PIN para entrar.</div>
+  <input id="pinEntrada" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+  <div class="erro" id="pinErro"></div>
+  <button class="btn salvar" style="width:100%;justify-content:center" onclick="tentarPin()">Entrar</button>
+  <div style="margin-top:12px;text-align:center"><button class="mini" onclick="esqueciPin()">Esqueci o PIN</button></div>
+</div></div>
+
+<div id="app">
+<div class="teste"><b>VERSÃO DE TESTE · NÃO OFICIAL</b> · atualização <span id="verTopo"></span><br>Os dados desta versão ficam separados da versão oficial.</div>
+<h1>Retirada de RG</h1>
+<div class="topo">
+  <input class="search" id="q" placeholder="Pesquisar nome, número ou observação..." oninput="render()">
+  <button class="novo" onclick="abrir('')">+ Novo</button>
+</div>
+<div class="painel" id="painel"></div>
+<div class="chips" id="chips"></div>
+<div class="linha">
+  <select class="sel2" id="selGrupo" onchange="setGrupo(this.value)"></select>
+  <select class="sel2" id="selOrdem" onchange="setOrdem(this.value)">
+    <option value="cad">Ordem de cadastro</option>
+    <option value="az">Nome A → Z</option>
+    <option value="za">Nome Z → A</option>
+    <option value="falta">Quem falta retirar primeiro</option>
+    <option value="tel">Por telefone</option>
+  </select>
+</div>
+<div class="linha">
+  <button class="mini" onclick="marcarVisiveis()">Marcar visíveis</button>
+  <button class="mini" onclick="limparSel()">Limpar marcação</button>
+  <button class="mini" onclick="abrirImport()">Importar lista</button>
+  <button class="mini" onclick="exportarCSV()">Exportar planilha</button>
+  <button class="mini" onclick="grupoDosMarcados()">Definir grupo dos marcados</button>
+  <button class="mini" onclick="imprimirFalta()">Imprimir lista</button>
+  <button class="mini" id="bLixeira" onclick="abrirLixeira()">Lixeira</button>
+  <button class="mini" onclick="abrirAjustes()">Ajustes</button>
+</div>
+<div class="modelo"><label for="selModelo">Mensagem:</label><select class="sel2" id="selModelo" onchange="setModelo(this.value)"></select></div>
+<button class="bulk" id="bulk" onclick="abrirFila()">Enviar</button>
+<div class="ajuda">Sem ninguém marcado: abre o WhatsApp, um contato por vez, de quem tem número, ainda não recebeu a mensagem e não retirou o RG. Com nomes marcados: envia só a eles. Se um grupo estiver escolhido, envia só aos pendentes dele. Quem pediu para não receber nunca entra no envio. Para falar com uma pessoa só, use o botão WhatsApp no nome dela.</div>
+<div class="resumo" id="resumo"></div>
+<div id="lista"></div>
+<div class="rodape-site">Feito por Vitor Silva<br>Versão de teste · atualização <span id="verRodape"></span> · <button onclick="abrirNovidades()">Novidades</button><br><button onclick="abrirTermos()">Termos de uso e privacidade</button></div>
+
+<!-- Cadastro / edição -->
+<div class="fundo" id="fundo"><div class="modal">
+  <h2 id="tituloModal">Novo cadastro</h2>
+  <label for="fNome">Nome</label>
+  <input id="fNome" autocomplete="off" oninput="avisarRepetido()">
+  <label for="fTel">Número (com DDD)</label>
+  <input id="fTel" type="tel" inputmode="numeric" placeholder="21999999999" autocomplete="off" oninput="ajustarEnv();avisarRepetido()">
+  <div class="dica">Pode deixar em branco e adicionar o número depois.</div>
+  <div class="aviso" id="fAviso"></div>
+  <label for="fGrupo">Grupo (etiqueta)</label>
+  <input id="fGrupo" list="dlGrupos" maxlength="30" autocomplete="off" placeholder="Ex.: Turma A">
+  <datalist id="dlGrupos"></datalist>
+  <label class="chk"><input type="checkbox" id="fRet"> RG já retirado</label>
+  <label class="chk"><input type="checkbox" id="fEnv"> Mensagem já enviada</label>
+  <label class="chk"><input type="checkbox" id="fNr"> Pediu para não receber mensagens</label>
+  <label for="fObs">Observações</label>
+  <textarea id="fObs" maxlength="300" placeholder="Ex.: ligar de novo na sexta"></textarea>
+  <div class="erro" id="erro"></div>
+  <div class="rodape">
+    <button class="btn excluir" id="bExcluir" onclick="excluir()">Excluir</button>
+    <button class="btn cancelar" onclick="fechar('fundo')">Cancelar</button>
+    <button class="btn salvar" onclick="salvarContato()">Salvar</button>
+  </div>
+</div></div>
+
+<!-- Envio em fila -->
+<div class="fundo" id="fundoFila"><div class="modal">
+  <h2 id="filaTitulo">Enviar</h2>
+  <div id="filaCorpo"></div>
+  <div class="rodape" id="filaBotoes"></div>
+</div></div>
+
+<!-- Importar lista -->
+<div class="fundo" id="fundoImport"><div class="modal">
+  <h2>Importar lista</h2>
+  <div class="dica">Cole um nome por linha, com ou sem número. Exemplos:<br>Maria Souza;21999998888<br>João Pereira - (21) 98888-7777<br>Ana Lima</div>
+  <label for="iTexto">Lista</label>
+  <textarea id="iTexto" style="min-height:140px"></textarea>
+  <div class="dica">Nomes que já existem sem número recebem o número da lista. Nomes repetidos são ignorados.</div>
+  <div class="msgok" id="iMsg"></div>
+  <div class="rodape">
+    <button class="btn cancelar" onclick="fechar('fundoImport')">Fechar</button>
+    <button class="btn salvar" onclick="importar()">Importar</button>
+  </div>
+</div></div>
+
+<!-- Ajustes -->
+<div class="fundo" id="fundoAjustes"><div class="modal">
+  <h2>Ajustes</h2>
+  <h3>Mensagens</h3>
+  <label for="aModelo">Modelo</label>
+  <select class="sel2" id="aModelo" style="width:100%" onchange="trocarModeloAj(this.value)"></select>
+  <label for="aModeloNome">Nome do modelo</label>
+  <input id="aModeloNome" maxlength="40" autocomplete="off">
+  <label for="aTexto">Texto</label>
+  <textarea id="aTexto" oninput="previa()"></textarea>
+  <div class="rodape" style="margin-top:6px">
+    <button class="btn cancelar" onclick="inserirNome()">Inserir {nome}</button>
+    <button class="btn cancelar" onclick="novoModelo()">Novo modelo</button>
+    <button class="btn excluir" onclick="excluirModelo()">Excluir modelo</button>
+  </div>
+  <div class="dica">{nome} vira o primeiro nome de quem vai receber.</div>
+  <label for="aLink">Link do grupo (vai no fim da mensagem)</label>
+  <input id="aLink" autocomplete="off" oninput="previa()">
+  <div class="dica">Prévia:</div>
+  <div class="previa" id="aPrevia"></div>
+  <label for="aDias">Mostrar em "Reenviar" quem recebeu há quantos dias ou mais</label>
+  <input id="aDias" type="number" min="1" max="60" inputmode="numeric">
+
+  <h3>Contato para pedidos de dados (LGPD)</h3>
+  <label for="aContato">E-mail ou WhatsApp</label>
+  <input id="aContato" autocomplete="off" placeholder="nome@email.com ou 21999999999">
+  <div class="dica">Aparece nos Termos de uso, para as pessoas pedirem correção ou exclusão dos dados.</div>
+
+  <h3>Modo manutenção</h3>
+  <div class="dica" id="manutStatus"></div>
+  <label for="aManutMsg">Mensagem para quem acessar</label>
+  <input id="aManutMsg" maxlength="140" autocomplete="off">
+  <label for="aManutAte">Liberar em (data e hora)</label>
+  <input id="aManutAte" type="datetime-local">
+  <div class="rodape" style="margin-top:6px">
+    <button class="btn cancelar" onclick="manutMais(30)">+30 min</button>
+    <button class="btn cancelar" onclick="manutMais(60)">+1 hora</button>
+    <button class="btn cancelar" onclick="manutMais(1440)">+1 dia</button>
+  </div>
+  <label for="aManutSenha">Senha de manutenção</label>
+  <input id="aManutSenha" type="password" autocomplete="off">
+  <div class="rodape" style="margin-top:6px">
+    <button class="btn excluir" onclick="ativarManut()">Ativar manutenção</button>
+    <button class="btn salvar" onclick="desativarManut()">Desativar</button>
+  </div>
+  <label for="aManutNova">Nova senha (de 6 a 40 caracteres)</label>
+  <input id="aManutNova" type="password" autocomplete="off">
+  <div class="rodape" style="margin-top:6px">
+    <button class="btn cancelar" onclick="trocarSenhaManut()">Trocar senha</button>
+    <button class="btn edit" onclick="gerarJsonManut()">Gerar manutencao.json (todos os visitantes)</button>
+  </div>
+  <textarea id="aManutJson" readonly style="min-height:130px;font-size:12px;display:none"></textarea>
+  <div class="rodape" id="bCopiarJson" style="margin-top:6px;display:none"><button class="btn cancelar" onclick="copiarJsonManut()">Copiar texto</button></div>
+  <div class="dica">Ao ativar, esta tela vale neste aparelho e nos aparelhos com a sincronização ligada. Para bloquear todos os visitantes do site, gere o manutencao.json e substitua o arquivo de mesmo nome no GitHub. É uma tela de aviso, não uma proteção forte: quem sabe mexer no navegador consegue contornar.</div>
+  <div id="manutMsg" class="erro"></div>
+
+  <h3>Segurança (PIN)</h3>
+  <div class="dica" id="pinStatus"></div>
+  <label for="aPin">Novo PIN (4 a 6 números)</label>
+  <input id="aPin" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+  <label for="aPin2">Repetir PIN</label>
+  <input id="aPin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+  <div class="rodape" style="margin-top:6px">
+    <button class="btn salvar" onclick="definirPin()">Definir PIN</button>
+    <button class="btn cancelar" onclick="removerPin()">Remover PIN</button>
+  </div>
+  <div class="dica">O PIN tranca a tela deste aparelho (também depois de 1 minuto fora do app). Ele não criptografa os dados guardados no aparelho.</div>
+  <div class="erro" id="pinMsg"></div>
+
+  <h3>Backup e planilha</h3>
+  <div class="rodape" style="margin-top:4px">
+    <button class="btn salvar" onclick="baixarBackup()">Salvar backup</button>
+    <button class="btn cancelar" onclick="el('arqBackup').click()">Restaurar backup</button>
+    <button class="btn edit" onclick="exportarCSV()">Exportar planilha (Excel)</button>
+  </div>
+  <input type="file" id="arqBackup" accept=".json,application/json" style="display:none" onchange="restaurarBackup(this)">
+  <div class="dica">A planilha é um arquivo .csv que abre no Excel. O backup guarda nomes, números, marcações, datas, observações e a mensagem.</div>
+  <div class="rodape" style="margin-top:6px"><button class="btn cancelar" onclick="copiarOficial()">Copiar dados da versão oficial</button></div>
+  <div class="dica">Só funciona se a versão oficial estiver no mesmo site (mesmo endereço) desta página. A oficial não é alterada.</div>
+
+  <h3>Usar em mais de um celular (opcional)</h3>
+  <label for="aUrl">Endereço do banco (Firebase Realtime Database)</label>
+  <input id="aUrl" autocomplete="off" placeholder="https://seu-projeto-default-rtdb.firebaseio.com">
+  <label for="aCodigo">Código da lista</label>
+  <input id="aCodigo" autocomplete="off">
+  <div class="rodape" style="margin-top:6px">
+    <button class="btn cancelar" onclick="gerarCodigo()">Gerar código</button>
+    <button class="btn cancelar" onclick="puxar(true)">Sincronizar agora</button>
+  </div>
+  <div class="dica" id="syncStatus"></div>
+  <details><summary>Como ligar</summary>
+    1) Crie um projeto em console.firebase.google.com e um Realtime Database.<br>
+    2) Cole o endereço do banco acima.<br>
+    3) Em Regras, cole o texto abaixo e publique:
+    <pre>{"rules":{".read":false,".write":false,"listas":{"$id":{".read":true,".write":true}}}}</pre>
+    4) Gere um código aqui e use o mesmo endereço e o mesmo código nos outros aparelhos de teste.<br>
+    A versão de teste grava numa lista separada (o código ganha "-teste" no fim), então não mistura com a oficial, mesmo usando o mesmo código.<br>
+    Quem tiver o endereço e o código consegue ver e alterar a lista (que tem nomes e telefones). Não compartilhe com quem não deve ter acesso. Se duas pessoas editarem ao mesmo tempo, vale a última alteração.
+  </details>
+  <div class="erro" id="aErro"></div>
+  <div class="rodape">
+    <button class="btn cancelar" onclick="fechar('fundoAjustes')">Cancelar</button>
+    <button class="btn salvar" onclick="salvarAjustes()">Salvar</button>
+  </div>
+</div></div>
+
+<!-- Novidades -->
+<div class="fundo" id="fundoNovidades"><div class="modal">
+  <h2>Novidades da versão de teste</h2>
+  <div class="novid" id="novidCorpo"></div>
+  <div class="rodape"><button class="btn salvar" onclick="fechar('fundoNovidades')">Fechar</button></div>
+</div></div>
+
+<!-- Termos de uso e privacidade -->
+<div class="fundo" id="fundoTermos"><div class="modal">
+  <h2>Termos de uso e privacidade</h2>
+  <div class="termos">
+    <p>Controle RG · feito por Vitor Silva · atualizado em 19/11/2026.</p>
+
+    <h3>1. Para que serve</h3>
+    <p>Este site organiza uma lista de nomes e telefones para avisar as pessoas sobre a retirada do RG. Ele não deve ser usado para outra finalidade.</p>
+
+    <h3>2. Dados tratados</h3>
+    <p>Nome, telefone e marcações feitas por quem usa (se o RG foi retirado, se a mensagem foi enviada, as datas, se a pessoa pediu para não receber mensagens e observações).</p>
+
+    <h3>3. Onde os dados ficam</h3>
+    <p>Ficam no navegador do aparelho de quem usa. Se a sincronização for ligada em Ajustes, também ficam no banco do Firebase configurado por quem a ligou. O site não envia esses dados ao autor. Nomes excluídos ficam na lixeira do aparelho por 14 dias e depois são apagados.</p>
+
+    <h3>4. Leis do Brasil</h3>
+    <ul>
+      <li><b>LGPD (Lei nº 13.709/2018):</b> os dados pessoais só podem ser usados para uma finalidade clara e informada, apenas no necessário, com segurança e transparência, e só quando houver uma base legal, como o consentimento da pessoa (art. 7º).</li>
+      <li><b>Marco Civil da Internet (Lei nº 12.965/2014):</b> protege a privacidade e os dados pessoais no uso da internet.</li>
+      <li><b>Constituição Federal, art. 5º, X:</b> garante a intimidade e a vida privada.</li>
+    </ul>
+
+    <h3>5. Responsabilidade de quem cadastra</h3>
+    <p>Quem cadastra nomes e telefones é o responsável por esses dados e deve ter autorização das pessoas para contatá-las. Só cadastre quem pediu ou aceitou receber o aviso.</p>
+
+    <h3>6. Direitos das pessoas cadastradas</h3>
+    <p>Conforme o art. 18 da LGPD, a pessoa pode pedir para confirmar o uso dos seus dados, ver, corrigir, excluir ou retirar a autorização. Quem mantém a lista pode corrigir ou excluir o cadastro no próprio site (botão Editar).</p>
+    <p id="termosContato"></p>
+
+    <h3>7. Mensagens</h3>
+    <p>Envie apenas o aviso combinado. Quem pedir para não receber fica marcado no site e fora dos envios. Não use o site para spam ou propaganda. O WhatsApp também tem regras próprias que podem bloquear contas que enviam mensagens em excesso.</p>
+
+    <h3>8. Segurança</h3>
+    <p>Não compartilhe arquivos de backup ou planilhas, o endereço do banco nem o código da lista com quem não deve ver os dados. Proteja o aparelho com senha ou biometria. O PIN do site, se ativado, só tranca a tela e não criptografa os dados. Listas impressas ou salvas em PDF também têm dados pessoais: guarde e descarte com cuidado.</p>
+
+    <h3>9. Sem garantias</h3>
+    <p>O site é oferecido como está, sem garantia de funcionamento contínuo. Faça backups com frequência. Quem usa responde pelo uso que faz.</p>
+
+    <p class="dica" style="margin-top:12px">Este texto é informativo e não substitui orientação de um advogado.</p>
+  </div>
+  <div class="rodape"><button class="btn salvar" onclick="fechar('fundoTermos')">Fechar</button></div>
+</div></div>
+
+<!-- Lixeira -->
+<div class="fundo" id="fundoLixeira"><div class="modal">
+  <h2>Lixeira</h2>
+  <div class="dica">Nomes excluídos ficam aqui por 14 dias e depois são apagados de vez. A lixeira fica só neste aparelho.</div>
+  <div id="lixCorpo"></div>
+  <div class="rodape">
+    <button class="btn excluir" onclick="esvaziarLix()">Esvaziar</button>
+    <button class="btn salvar" onclick="fechar('fundoLixeira')">Fechar</button>
+  </div>
+</div></div>
+</div>
+
+<div id="toast"><span id="toastTxt"></span><button id="toastBtn" onclick="desfazer()">Desfazer</button></div>
+<div id="impressao"></div>
+
+<script>
+const ATUALIZACAO='002';
+const CHANGELOG=[
+ {n:'002',data:'19/11/2026',itens:[
+  'Modo manutenção: tela de bloqueio com contagem regressiva e data de liberação.',
+  'Senha para ligar e desligar a manutenção (você pode trocar a senha em Ajustes).',
+  'Liberação automática quando o tempo acaba.',
+  'Para valer para todos os visitantes: arquivo manutencao.json gerado em Ajustes.',
+  'Com a sincronização ligada, a manutenção vale em todos os aparelhos sincronizados.'
+ ]},
+ {n:'001',data:'19/11/2026',itens:[
+  'Desfazer a última ação e lixeira (nomes excluídos ficam 14 dias).',
+  'Vários modelos de mensagem, com escolha na hora do envio.',
+  'Aviso ao cadastrar nome ou número repetido.',
+  'Grupos (etiquetas), filtro por grupo e envio só para um grupo.',
+  'Ordenar a lista.',
+  'Botões Ligar e Copiar número.',
+  'Imprimir a lista de quem falta retirar o RG.'
+ ]},
+ {n:'000',data:'19/11/2026',itens:[
+  'Bloqueio com PIN (Ajustes > Segurança).',
+  '{nome} na mensagem: o texto começa com o nome da pessoa.',
+  'Botão "Não quer receber": a pessoa fica fora de todos os envios.',
+  'Data da retirada e do envio, observações em cada nome e filtro "Reenviar".',
+  'Exportar planilha (.csv) para abrir no Excel.',
+  'Painel com números no topo.',
+  'Contato para pedidos de dados (LGPD) nos Termos de uso.',
+  'Versão separada: os dados de teste não se misturam com os da versão oficial.'
+ ]}
+];
+const K={c:'controleRG_teste_contatos',e:'controleRG_teste_env',cfg:'controleRG_teste_config',t:'controleRG_teste_t',lx:'controleRG_teste_lixeira'};
+const TEXTO_PADRAO='Olá, {nome}! Estou entrando em contato sobre a retirada do RG.\nEntre nesse link para receber informações:';
+const SENHA_PADRAO='dev3232';
+const MSG_MANUT_PADRAO='Estamos fazendo melhorias. Voltamos em breve.';
+const MODELOS_PADRAO=[
+ {id:'m1',nome:'RG disponível',texto:TEXTO_PADRAO},
+ {id:'m2',nome:'Lembrete',texto:'Olá, {nome}! Lembrando que o seu RG está disponível para retirada.\nEntre nesse link para receber informações:'},
+ {id:'m3',nome:'Última chamada',texto:'Olá, {nome}! Esta é a última chamada para a retirada do RG.\nEntre nesse link para receber informações:'}];
+const LINK_PADRAO='https://chat.whatsapp.com/B4uXo65c01y4oKos58HPqH?s=cl&p=a&iam=2';
+const ICONE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#25D366" d="M8.6 7.5c-.6 0-1.1.5-1.1 1.4 0 3.2 3.4 6.6 6.7 6.7.9 0 1.4-.5 1.4-1.1l-.1-.8-1.8-.8-.8.9c-1.1-.5-2.1-1.5-2.6-2.6l.9-.8-.8-1.8z"/></svg>';
+const padrao=[];
+const FILTROS=[['todos','Todos'],['sem','Sem número'],['naoenv','Não enviados'],['env','Enviados'],['reenviar','Reenviar'],['ret','RG retirado'],['nr','Não quer receber']];
+
+function ler(k,def){try{const s=localStorage.getItem(k);if(s!==null)return JSON.parse(s)}catch(e){}return def}
+function gravar(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function esc(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function soDigitos(t){let d=String(t||'').replace(/\D/g,'');if(d.length>11&&d.startsWith('55'))d=d.slice(2);return d}
+function telValido(d){return d.length===10||d.length===11}
+function formatar(d){
+  if(d.length===11)return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if(d.length===10)return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return d;
+}
+function novoId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function dataCurta(ts){return new Date(ts).toLocaleDateString('pt-BR')}
+function diasDesde(ts){return ts?Math.floor((Date.now()-ts)/86400000):Infinity}
+function relDias(ts){if(!ts)return '';const d=diasDesde(ts);return d<=0?'hoje':d===1?'ontem':'há '+d+' dias'}
+function normalizar(l){
+  if(!Array.isArray(l))return [];
+  const usados=new Set();
+  return l.map(c=>{
+    const o=Array.isArray(c)?{nome:c[0],tel:c[1]}:(c||{});
+    let id=String(o.id||'');
+    if(!/^[a-z0-9]{3,30}$/.test(id)||usados.has(id))id=novoId();
+    usados.add(id);
+    const t=soDigitos(o.tel),ret=!!o.ret;
+    return {id,nome:String(o.nome||'').trim().replace(/\s+/g,' ').slice(0,120),tel:telValido(t)?t:'',ret,
+      dRet:ret?(Number(o.dRet)||0):0,nr:!!o.nr,obs:String(o.obs||'').slice(0,300),grupo:String(o.grupo||'').trim().slice(0,30)};
+  }).filter(c=>c.nome);
+}
+function normModelos(l,legado){
+  let r=[];
+  if(Array.isArray(l)){
+    const us=new Set();
+    l.forEach(m=>{
+      if(!m||typeof m!=='object')return;
+      let id=String(m.id||'');
+      if(!/^[a-z0-9]{2,30}$/.test(id)||us.has(id))id=novoId();
+      us.add(id);
+      const nome=String(m.nome||'').trim().slice(0,40),texto=String(m.texto||'').slice(0,1000);
+      if(nome)r.push({id,nome,texto});
+    });
+  }
+  if(!r.length)r=MODELOS_PADRAO.map(m=>({id:m.id,nome:m.nome,texto:m.texto}));
+  if(!Array.isArray(l)&&typeof legado==='string'&&legado.trim())r[0].texto=legado.slice(0,1000);
+  return r;
+}
+function normLix(l){
+  if(!Array.isArray(l))return [];
+  const lim=Date.now()-14*86400000;
+  return l.map(x=>{const c=x&&normalizar([x.c])[0];return c?{c,ts:Number(x.ts)||Date.now()}:null}).filter(x=>x&&x.ts>=lim);
+}
+function normEnv(x){
+  const r={};
+  if(Array.isArray(x)){x.forEach(t=>{t=String(t);if(/^\d{10,11}$/.test(t))r[t]=0})}
+  else if(x&&typeof x==='object'){Object.keys(x).forEach(t=>{if(/^\d{10,11}$/.test(t))r[t]=Number(x[t])||0})}
+  return r;
+}
+
+let cfg=Object.assign({link:LINK_PADRAO,dbUrl:'',codigo:'',contato:'',diasReenvio:7,pin:null,manut:null,modeloAtivo:'',ordem:'cad'},ler(K.cfg,{}));
+cfg.modelos=normModelos(cfg.modelos,cfg.texto);delete cfg.texto;
+cfg.manut=normManut(cfg.manut);
+if(!cfg.modelos.some(m=>m.id===cfg.modeloAtivo))cfg.modeloAtivo=cfg.modelos[0].id;
+if(!['cad','az','za','falta','tel'].includes(cfg.ordem))cfg.ordem='cad';
+let contatos=normalizar(ler(K.c,null)||padrao);
+let env=normEnv(ler(K.e,{}));
+let tLocal=Number(ler(K.t,0))||0;
+let filtro='todos',editando='',fila=[],pos=0,syncTimer=null,erros=0,bloqAte=0,ocultoEm=0;
+const sel=new Set();
+let lixeira=normLix(ler(K.lx,[])),pilha=[],grupoF='',toastTimer=null,rasc=[],rascSel='';
+let manutArq=null,liberadoSessao=lerSessao(),manutErros=0,manutBloq=0;
+
+function el(id){return document.getElementById(id)}
+function abrirModal(id){el(id).classList.add('aberto')}
+function fechar(id){el(id).classList.remove('aberto')}
+function foiEnviado(t){return !!t&&Object.prototype.hasOwnProperty.call(env,t)}
+function marcarEnviado(t){env[t]=Date.now()}
+function bloqueado(t){return !!t&&contatos.some(c=>c.tel===t&&c.nr)}
+
+/* ---------- mensagem ---------- */
+function listaPrimeiros(nomes){
+  const p=[];
+  (nomes||[]).forEach(n=>{const w=String(n).trim().split(/\s+/)[0];if(w&&!p.includes(w))p.push(w)});
+  if(p.length<=1)return p.join('');
+  return p.slice(0,-1).join(', ')+' e '+p[p.length-1];
+}
+function aplicarNome(texto,nomes){
+  const s=listaPrimeiros(nomes);
+  if(s)return texto.replace(/\{nome\}/gi,s);
+  return texto.replace(/[,\s]*\{nome\}/gi,'');
+}
+function montarMensagem(texto,link,nomes){return (aplicarNome(texto||'',nomes)+(link?'\n'+link:'')).trim()}
+function mensagem(nomes){return montarMensagem(modeloAtivo().texto,cfg.link,nomes)}
+function modeloAtivo(){return cfg.modelos.find(m=>m.id===cfg.modeloAtivo)||cfg.modelos[0]}
+function linkZap(tel,nomes){return 'https://wa.me/55'+tel+'?text='+encodeURIComponent(mensagem(nomes))}
+
+function salvar(){
+  tLocal=Date.now();
+  gravar(K.c,contatos);gravar(K.e,env);gravar(K.t,tLocal);gravar(K.cfg,cfg);gravar(K.lx,lixeira);
+  agendarEnvio();render();
+}
+
+/* ---------- lista ---------- */
+function passa(c,f){
+  if(f==='sem')return !c.tel;
+  if(f==='naoenv')return !!c.tel&&!foiEnviado(c.tel);
+  if(f==='env')return foiEnviado(c.tel);
+  if(f==='reenviar')return foiEnviado(c.tel)&&!c.ret&&!bloqueado(c.tel)&&diasDesde(env[c.tel])>=cfg.diasReenvio;
+  if(f==='ret')return c.ret;
+  if(f==='nr')return c.nr;
+  return true;
+}
+function passaGrupo(c){return grupoF===''||(grupoF==='__sem'?!c.grupo:c.grupo===grupoF)}
+function listaVisivel(){
+  const q=el('q').value.toLowerCase().trim(),qd=q.replace(/\D/g,'');
+  const r=[];
+  contatos.forEach((c,i)=>{
+    if(!passa(c,filtro)||!passaGrupo(c))return;
+    if(q&&!(c.nome.toLowerCase().includes(q)||c.obs.toLowerCase().includes(q)||(c.grupo||'').toLowerCase().includes(q)||(qd&&c.tel.includes(qd))))return;
+    r.push({c,i});
+  });
+  const cmp=(a,b)=>a.c.nome.localeCompare(b.c.nome,'pt-BR',{sensitivity:'base'});
+  if(cfg.ordem==='az')r.sort(cmp);
+  else if(cfg.ordem==='za')r.sort((a,b)=>cmp(b,a));
+  else if(cfg.ordem==='falta')r.sort((a,b)=>((a.c.ret?1:0)-(b.c.ret?1:0))||(a.i-b.i));
+  else if(cfg.ordem==='tel')r.sort((a,b)=>(a.c.tel||'~').localeCompare(b.c.tel||'~')||(a.i-b.i));
+  return r;
+}
+function gruposExistentes(){return [...new Set(contatos.map(c=>c.grupo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'))}
+function setGrupo(v){grupoF=v;render()}
+function setOrdem(v){cfg.ordem=v;gravar(K.cfg,cfg);render()}
+function setModelo(id){cfg.modeloAtivo=id;gravar(K.cfg,cfg);render()}
+function painel(){
+  const t=contatos.length,ret=contatos.filter(c=>c.ret).length;
+  const envN=contatos.filter(c=>foiEnviado(c.tel)).length;
+  const sem=contatos.filter(c=>!c.tel).length,nr=contatos.filter(c=>c.nr).length;
+  const pct=t?Math.round(ret*100/t):0;
+  const k=(n,l)=>`<div class="kpi"><b>${n}</b><span>${l}</span></div>`;
+  el('painel').innerHTML=k(t,'nomes')+k(ret,'RG retirado')+k(t-ret,'faltam retirar')+k(envN,'mensagem enviada')+k(sem,'sem número')+k(nr,'não querem receber')
+    +`<div class="barra"><div style="width:${pct}%"></div></div><div class="barra-txt">${pct}% já retiraram o RG</div>`;
+}
+function render(){
+  sel.forEach(id=>{if(!contatos.some(c=>c.id===id))sel.delete(id)});
+  const gs=gruposExistentes();
+  if(grupoF&&grupoF!=='__sem'&&!gs.includes(grupoF))grupoF='';
+  el('selGrupo').innerHTML='<option value="">Todos os grupos</option><option value="__sem">Sem grupo</option>'+gs.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('');
+  el('selGrupo').value=grupoF;
+  el('selModelo').innerHTML=cfg.modelos.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
+  el('selModelo').value=cfg.modeloAtivo;
+  el('bLixeira').textContent='Lixeira ('+lixeira.length+')';
+  painel();
+  el('chips').innerHTML=FILTROS.map(f=>{
+    const n=contatos.filter(c=>passaGrupo(c)&&passa(c,f[0])).length;
+    return `<button class="chip ${filtro===f[0]?'on':''}" onclick="setFiltro('${f[0]}')">${f[1]} (${n})</button>`;
+  }).join('');
+  let h='';
+  const vis=listaVisivel();
+  vis.forEach(({c,i})=>{
+    const blq=bloqueado(c.tel);
+    let tags='';
+    if(foiEnviado(c.tel)){const r=relDias(env[c.tel]);tags+=`<span class="tag env">✓ enviado${r?' '+r:''}</span>`}
+    if(c.ret)tags+=`<span class="tag ret">RG retirado${c.dRet?' em '+dataCurta(c.dRet):''}</span>`;
+    if(c.nr)tags+='<span class="tag nr">Não quer receber</span>';
+    else if(blq)tags+='<span class="tag bloq">Número bloqueado</span>';
+    if(c.grupo)tags+=`<span class="tag gr">${esc(c.grupo)}</span>`;
+    const tel=c.tel
+      ?`<div class="tel">${esc(formatar(c.tel))}</div>${tags?`<div>${tags}</div>`:''}`
+      :`<div class="sem">Sem número cadastrado</div>${tags?`<div>${tags}</div>`:''}`;
+    let zap='';
+    if(!c.tel)zap=`<button class="btn add" onclick="abrir('${c.id}')">Adicionar número</button>`;
+    else if(!blq)zap=`<a class="btn zap" target="_blank" rel="noopener" href="${linkZap(c.tel,[c.nome])}" onclick="enviadoUm('${c.tel}')">${ICONE}WhatsApp</a>`;
+    const lig=c.tel?`<a class="btn peq lig" href="tel:+55${c.tel}">Ligar</a><button class="btn peq lig" onclick="copiarNum('${c.tel}')">Copiar</button>`:'';
+    const edit=c.tel?`<button class="btn peq edit" onclick="abrir('${c.id}')">Editar</button>`:'';
+    const ret=`<button class="btn peq ${c.ret?'desf':'retb'}" onclick="alternarRet('${c.id}')">${c.ret?'Desfazer retirado':'RG retirado'}</button>`;
+    const nr=`<button class="btn peq ${c.nr?'desf':'nrb'}" onclick="alternarNr('${c.id}')">${c.nr?'Permitir mensagens':'Não quer receber'}</button>`;
+    const obs=c.obs?`<div class="obs">Obs.: ${esc(c.obs)}</div>`:'';
+    h+=`<div class="card ${c.ret?'ret':''} ${c.nr?'nr':''}"><div class="lado"><label class="sel"><input type="checkbox" ${sel.has(c.id)?'checked':''} onchange="alternarSel('${c.id}',this.checked)"></label><div class="num">${i+1}</div></div><div class="info"><div class="nome">${esc(c.nome)}</div>${tel}${obs}<div class="acoes">${zap}${lig}${edit}${ret}${nr}</div></div></div>`;
+  });
+  if(!vis.length)h='<div class="vazio">Nenhum nome encontrado.</div>';
+  el('lista').innerHTML=h;
+  resumo();atualizarBulk();
+}
+function resumo(){
+  el('resumo').textContent=listaVisivel().length+' exibidos de '+contatos.length+(sel.size?' · '+sel.size+' marcados':'');
+}
+function setFiltro(f){filtro=f;render()}
+function alternarSel(id,on){if(on)sel.add(id);else sel.delete(id);resumo();atualizarBulk()}
+function marcarVisiveis(){listaVisivel().forEach(({c})=>sel.add(c.id));render()}
+function limparSel(){sel.clear();render()}
+function alternarRet(id){const c=contatos.find(x=>x.id===id);if(!c)return;guardar((c.ret?'Retirada desfeita: ':'RG retirado: ')+c.nome);c.ret=!c.ret;c.dRet=c.ret?Date.now():0;salvar()}
+function alternarNr(id){
+  const c=contatos.find(x=>x.id===id);if(!c)return;
+  if(!c.nr&&!confirm('Marcar "'+c.nome+'" como quem não quer receber mensagens? Essa pessoa (e o número dela) ficará fora de todos os envios.'))return;
+  guardar((c.nr?'Mensagens permitidas: ':'Não quer receber: ')+c.nome);
+  c.nr=!c.nr;salvar();
+}
+function enviadoUm(tel){setTimeout(()=>{marcarEnviado(tel);salvar()},400)}
+
+/* ---------- cadastro / edição ---------- */
+function ajustarEnv(){const t=soDigitos(el('fTel').value);el('fEnv').disabled=!telValido(t);if(!telValido(t))el('fEnv').checked=false}
+function abrir(id){
+  editando=id;
+  const c=id?contatos.find(x=>x.id===id):null;
+  el('tituloModal').textContent=c?'Editar cadastro':'Novo cadastro';
+  el('fNome').value=c?c.nome:'';
+  el('fTel').value=c?c.tel:'';
+  el('fRet').checked=c?c.ret:false;
+  el('fNr').checked=c?c.nr:false;
+  el('fObs').value=c?c.obs:'';
+  el('fGrupo').value=c?c.grupo:(grupoF&&grupoF!=='__sem'?grupoF:'');
+  el('dlGrupos').innerHTML=gruposExistentes().map(g=>`<option value="${esc(g)}">`).join('');
+  ajustarEnv();
+  el('fEnv').checked=c?foiEnviado(c.tel):false;
+  el('bExcluir').style.display=c?'':'none';
+  el('erro').textContent='';
+  avisarRepetido();
+  abrirModal('fundo');
+  setTimeout(()=>el(!c||c.tel?'fNome':'fTel').focus(),50);
+}
+function semAcento(t){return String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
+function acharRepetidos(nome,tel,ignorar){
+  const n=semAcento(nome);
+  const porNome=n?contatos.filter(c=>c.id!==ignorar&&semAcento(c.nome)===n):[];
+  const porTel=tel&&telValido(tel)?contatos.filter(c=>c.id!==ignorar&&c.tel===tel):[];
+  return {porNome,porTel};
+}
+function textoRepetidos(r,longo){
+  const p=[];
+  if(r.porNome.length)p.push('Já existe alguém com o mesmo nome: '+r.porNome.map(x=>x.nome).slice(0,3).join(', ')+'.');
+  const soTel=r.porTel.filter(x=>!r.porNome.includes(x));
+  if(soTel.length)p.push('O número já está em: '+soTel.map(x=>x.nome).slice(0,3).join(', ')+(longo?'.':' (normal se forem da mesma família).'));
+  return p;
+}
+function avisarRepetido(){
+  const r=acharRepetidos(el('fNome').value,soDigitos(el('fTel').value),editando);
+  el('fAviso').textContent=textoRepetidos(r,false).join(' ');
+}
+function salvarContato(){
+  const nome=el('fNome').value.trim().replace(/\s+/g,' ');
+  const tel=soDigitos(el('fTel').value);
+  if(!nome){el('erro').textContent='Digite o nome.';return}
+  if(tel&&!telValido(tel)){el('erro').textContent='O número deve ter DDD + 8 ou 9 dígitos.';return}
+  let c=editando?contatos.find(x=>x.id===editando):null;
+  if(!c||c.nome!==nome||c.tel!==tel){
+    const p=textoRepetidos(acharRepetidos(nome,tel,editando),true);
+    if(p.length&&!confirm(p.join('\n')+'\n\nSalvar mesmo assim?'))return;
+  }
+  guardar(c?'Cadastro alterado: '+nome:'Cadastro criado: '+nome);
+  if(!c){c={id:novoId(),nome:'',tel:'',ret:false,dRet:0,nr:false,obs:'',grupo:''};contatos.push(c)}
+  c.nome=nome;c.tel=tel;
+  const ret=el('fRet').checked;
+  if(ret&&!c.ret)c.dRet=Date.now();
+  if(!ret)c.dRet=0;
+  c.ret=ret;c.nr=el('fNr').checked;c.obs=el('fObs').value.trim().slice(0,300);
+  c.grupo=el('fGrupo').value.trim().slice(0,30);
+  if(tel){
+    if(el('fEnv').checked&&!foiEnviado(tel))marcarEnviado(tel);
+    if(!el('fEnv').checked&&foiEnviado(tel))delete env[tel];
+  }
+  fechar('fundo');salvar();
+}
+function excluir(){
+  const c=contatos.find(x=>x.id===editando);
+  if(!c)return;
+  if(!confirm('Excluir "'+c.nome+'"? Ele vai para a lixeira por 14 dias.'))return;
+  guardar('Excluído: '+c.nome);
+  lixeira.push({c:Object.assign({},c),ts:Date.now()});
+  contatos=contatos.filter(x=>x.id!==editando);
+  fechar('fundo');salvar();
+}
+
+/* ---------- envio em fila ---------- */
+function alvoEnvio(){
+  const mapa=new Map();
+  const lista=sel.size
+    ?contatos.filter(c=>sel.has(c.id)&&c.tel&&!bloqueado(c.tel))
+    :contatos.filter(c=>passaGrupo(c)&&c.tel&&!c.ret&&!bloqueado(c.tel)&&!foiEnviado(c.tel));
+  lista.forEach(c=>{if(!mapa.has(c.tel))mapa.set(c.tel,[]);mapa.get(c.tel).push(c.nome)});
+  return [...mapa.entries()];
+}
+function rotuloEnvio(){
+  if(sel.size)return 'Enviar para selecionados';
+  if(grupoF==='__sem')return 'Enviar para pendentes sem grupo';
+  if(grupoF)return 'Enviar para pendentes de '+grupoF;
+  return 'Enviar para todos pendentes';
+}
+function atualizarBulk(){
+  const n=alvoEnvio().length,b=el('bulk');
+  b.textContent=rotuloEnvio()+' ('+n+')';
+  b.disabled=n===0;
+}
+function abrirFila(){
+  fila=alvoEnvio();pos=0;
+  el('filaTitulo').textContent=rotuloEnvio();
+  abrirModal('fundoFila');telaFila();
+}
+function fecharFila(){fechar('fundoFila');render()}
+function telaFila(){
+  const corpo=el('filaCorpo'),bot=el('filaBotoes');
+  if(pos<fila.length){
+    const num=fila[pos][0],nomes=fila[pos][1];
+    corpo.innerHTML=`<div class="fila-prog">${pos+1} de ${fila.length}</div><div class="fila-nome">${esc(nomes.join(', '))}</div><div class="fila-tel">${esc(formatar(num))}</div><div class="dica">Toque em Abrir WhatsApp, envie a mensagem e volte aqui para o próximo.</div><div class="dica">Modelo: ${esc(modeloAtivo().nome)}</div>`;
+    bot.innerHTML=`<a class="btn zap" target="_blank" rel="noopener" href="${linkZap(num,nomes)}" onclick="enviadoFila()">${ICONE}Abrir WhatsApp</a><button class="btn cancelar" onclick="pular()">Pular</button><button class="btn cancelar" onclick="fecharFila()">Fechar</button>`;
+  }else{
+    corpo.innerHTML=`<div class="fila-nome">${fila.length?'Fila concluída':'Nada para enviar'}</div><div class="dica">${Object.keys(env).length} número(s) marcados como enviados.</div>`;
+    bot.innerHTML=`<button class="btn cancelar" onclick="recomecar()">Limpar marcação de enviados</button><button class="btn salvar" onclick="fecharFila()">Fechar</button>`;
+  }
+}
+function enviadoFila(){
+  const num=fila[pos][0];
+  pos++;
+  setTimeout(()=>{marcarEnviado(num);salvar();telaFila()},400);
+}
+function pular(){pos++;telaFila()}
+function recomecar(){
+  if(!confirm('Limpar a marcação de enviados de todos?'))return;
+  guardar('Marcações de enviados limpas');
+  env={};salvar();abrirFila();
+}
+
+/* ---------- importar / exportar ---------- */
+function abrirImport(){el('iTexto').value='';el('iMsg').textContent='';abrirModal('fundoImport')}
+function importar(){
+  const linhas=el('iTexto').value.split(/\r?\n/);
+  let novos=0,atual=0,dup=0,invalidos=0,semNome=0;
+  guardar('Lista importada');
+  linhas.forEach(l=>{
+    l=l.trim();if(!l)return;
+    let tel='';
+    const m=l.match(/\+?\d[\d\s().-]{8,}\d/);
+    let nome=l;
+    if(m){
+      nome=l.replace(m[0],' ');
+      const t=soDigitos(m[0]);
+      if(telValido(t))tel=t;else invalidos++;
+    }
+    nome=nome.replace(/^[\s;,:|\-–—]+|[\s;,:|\-–—]+$/g,'').replace(/\s+/g,' ').slice(0,120);
+    if(!nome){semNome++;return}
+    const ex=contatos.find(c=>c.nome.toLowerCase()===nome.toLowerCase()&&(!c.tel||!tel||c.tel===tel));
+    if(ex){
+      if(!ex.tel&&tel){ex.tel=tel;atual++}else dup++;
+    }else{contatos.push({id:novoId(),nome,tel,ret:false,dRet:0,nr:false,obs:'',grupo:''});novos++}
+  });
+  if(novos||atual)salvar();else{pilha.pop();el('toast').style.display='none'}
+  let t=novos+' novo(s) · '+atual+' número(s) preenchido(s) · '+dup+' repetido(s) ignorado(s)';
+  if(invalidos)t+='\n'+invalidos+' número(s) com tamanho inválido ficaram sem número';
+  if(semNome)t+='\n'+semNome+' linha(s) sem nome ignorada(s)';
+  el('iMsg').textContent=t;
+}
+function baixar(conteudo,tipo,nome){
+  const blob=new Blob([conteudo],{type:tipo});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=nome;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+function hoje(){return new Date().toISOString().slice(0,10)}
+function csvCel(v){let s=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
+function gerarCSV(){
+  const cab=['Nº','Nome','Grupo','Telefone','RG retirado','Data da retirada','Mensagem enviada','Data do envio','Não quer receber','Observações'];
+  const linhas=contatos.map((c,i)=>[i+1,c.nome,c.grupo||'',c.tel?formatar(c.tel):'',c.ret?'Sim':'Não',c.ret&&c.dRet?dataCurta(c.dRet):'',foiEnviado(c.tel)?'Sim':'Não',foiEnviado(c.tel)&&env[c.tel]?dataCurta(env[c.tel]):'',c.nr?'Sim':'Não',c.obs]);
+  return '\ufeff'+[cab,...linhas].map(l=>l.map(csvCel).join(';')).join('\r\n');
+}
+function exportarCSV(){baixar(gerarCSV(),'text/csv;charset=utf-8','controle-rg-teste-'+hoje()+'.csv')}
+
+/* ---------- backup ---------- */
+function baixarBackup(){
+  const dados={versao:'teste-'+ATUALIZACAO,contatos,env,modelos:cfg.modelos,link:cfg.link,contato:cfg.contato,diasReenvio:cfg.diasReenvio};
+  baixar(JSON.stringify(dados,null,1),'application/json','controle-rg-teste-backup-'+hoje()+'.json');
+}
+function aplicarConfigExterna(d){
+  if(Array.isArray(d.modelos))cfg.modelos=normModelos(d.modelos);
+  else if(typeof d.texto==='string'&&d.texto.trim())cfg.modelos[0].texto=d.texto.slice(0,1000);
+  if(!cfg.modelos.some(m=>m.id===cfg.modeloAtivo))cfg.modeloAtivo=cfg.modelos[0].id;
+  if(typeof d.link==='string')cfg.link=d.link.slice(0,500);
+  if(typeof d.contato==='string')cfg.contato=d.contato.slice(0,120);
+  const dias=Number(d.diasReenvio);
+  if(dias>=1&&dias<=60)cfg.diasReenvio=Math.floor(dias);
+}
+function restaurarBackup(inp){
+  const f=inp.files&&inp.files[0];
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      const lista=normalizar(d.contatos);
+      if(!lista.length)throw 0;
+      if(!confirm('Substituir a lista atual por '+lista.length+' nomes do backup?'))return;
+      guardar('Backup restaurado');contatos=lista;env=normEnv(d.env||d.enviados);aplicarConfigExterna(d);
+      fechar('fundoAjustes');salvar();
+    }catch(e){alert('Arquivo de backup inválido.')}
+    inp.value='';
+  };
+  r.readAsText(f);
+}
+function copiarOficial(){
+  const c=normalizar(ler('controleRG_contatos',null));
+  if(!c.length){alert('Não encontrei dados da versão oficial neste navegador. A versão oficial precisa estar no mesmo site (mesmo endereço) que esta página de teste.');return}
+  if(!confirm('Copiar '+c.length+' nomes da versão oficial para esta versão de teste? A lista de teste atual será substituída. A oficial não é alterada.'))return;
+  guardar('Dados da versão oficial copiados');contatos=c;env=normEnv(ler('controleRG_enviados',[]));
+  const o=ler('controleRG_config',{});
+  if(o&&typeof o==='object')aplicarConfigExterna({texto:o.texto,link:o.link});
+  fechar('fundoAjustes');salvar();
+}
+
+/* ---------- ajustes ---------- */
+function previa(){el('aPrevia').textContent=montarMensagem(el('aTexto').value,el('aLink').value.trim(),['Maria'])}
+function inserirNome(){
+  const t=el('aTexto');
+  const i=typeof t.selectionStart==='number'?t.selectionStart:t.value.length;
+  t.value=t.value.slice(0,i)+'{nome}'+t.value.slice(i);
+  previa();
+}
+function abrirAjustes(){
+  rasc=cfg.modelos.map(m=>({id:m.id,nome:m.nome,texto:m.texto}));rascSel=cfg.modeloAtivo;
+  preencherModelo();
+  el('aLink').value=cfg.link;el('aDias').value=cfg.diasReenvio;
+  el('aContato').value=cfg.contato;
+  el('aUrl').value=cfg.dbUrl;el('aCodigo').value=cfg.codigo;
+  el('aPin').value='';el('aPin2').value='';el('pinMsg').textContent='';
+  el('pinStatus').textContent=pinAtivo()?'PIN ligado neste aparelho.':'PIN desligado.';
+  el('aErro').textContent='';
+  preencherManut();
+  previa();
+  status(syncAtivo()?'Sincronização ligada.':'Sincronização desligada.');
+  abrirModal('fundoAjustes');
+}
+function preencherModelo(){
+  const m=rasc.find(x=>x.id===rascSel)||rasc[0];
+  rascSel=m.id;
+  el('aModelo').innerHTML=rasc.map(x=>`<option value="${x.id}">${esc(x.nome)}</option>`).join('');
+  el('aModelo').value=rascSel;
+  el('aModeloNome').value=m.nome;
+  el('aTexto').value=m.texto;
+}
+function lerModelo(){
+  const m=rasc.find(x=>x.id===rascSel);
+  if(!m)return;
+  m.nome=el('aModeloNome').value.trim().slice(0,40)||m.nome;
+  m.texto=el('aTexto').value.slice(0,1000);
+}
+function trocarModeloAj(id){lerModelo();rascSel=id;preencherModelo();previa()}
+function novoModelo(){
+  lerModelo();
+  const m={id:novoId(),nome:'Novo modelo',texto:'Olá, {nome}!'};
+  rasc.push(m);rascSel=m.id;preencherModelo();previa();
+}
+function excluirModelo(){
+  if(rasc.length<=1){el('aErro').textContent='Mantenha pelo menos um modelo.';return}
+  const m=rasc.find(x=>x.id===rascSel);
+  if(!confirm('Excluir o modelo "'+(m?m.nome:'')+'"?'))return;
+  rasc=rasc.filter(x=>x.id!==rascSel);rascSel=rasc[0].id;
+  el('aErro').textContent='';preencherModelo();previa();
+}
+function gerarCodigo(){
+  let s='';
+  try{const a=new Uint8Array(16);crypto.getRandomValues(a);s=[...a].map(b=>b.toString(36).padStart(2,'0')).join('')}
+  catch(e){for(let i=0;i<28;i++)s+=Math.floor(Math.random()*36).toString(36)}
+  el('aCodigo').value=s;
+}
+function salvarAjustes(){
+  const link=el('aLink').value.trim().slice(0,500);
+  const dias=Math.floor(Number(el('aDias').value));
+  const contato=el('aContato').value.trim().slice(0,120);
+  const url=el('aUrl').value.trim().replace(/\/+$/,''),codigo=el('aCodigo').value.trim();
+  const erro=el('aErro');
+  if(link&&!/^https?:\/\//i.test(link)){erro.textContent='O link do grupo deve começar com https://';return}
+  if(!(dias>=1&&dias<=60)){erro.textContent='Os dias para reenviar devem ficar entre 1 e 60.';return}
+  if(contato&&!contatoHref(contato)){erro.textContent='O contato deve ser um e-mail ou um WhatsApp com DDD.';return}
+  if(url||codigo){
+    if(!/^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.(firebaseio\.com|firebasedatabase\.app)$/i.test(url)){erro.textContent='Endereço do banco inválido. Ele termina em firebaseio.com ou firebasedatabase.app.';return}
+    if(!/^[A-Za-z0-9_-]{16,}$/.test(codigo)){erro.textContent='O código precisa ter pelo menos 16 letras ou números. Use "Gerar código".';return}
+  }
+  lerModelo();
+  const novos=normModelos(rasc);
+  const mudouSync=url!==cfg.dbUrl||codigo!==cfg.codigo;
+  const mudouDados=JSON.stringify(novos)!==JSON.stringify(cfg.modelos)||link!==cfg.link||contato!==cfg.contato;
+  cfg.modelos=novos;
+  if(!novos.some(m=>m.id===cfg.modeloAtivo))cfg.modeloAtivo=novos[0].id;
+  cfg.link=link;cfg.contato=contato;cfg.diasReenvio=dias;cfg.dbUrl=url;cfg.codigo=codigo;
+  gravar(K.cfg,cfg);
+  fechar('fundoAjustes');
+  if(mudouDados)salvar();else render();
+  if(mudouSync&&syncAtivo())primeiraSync();
+}
+
+/* ---------- PIN ---------- */
+function pinAtivo(){return !!(cfg.pin&&cfg.pin.h)}
+function temSubtle(){try{return !!(crypto&&crypto.subtle)}catch(e){return false}}
+async function hashPin(pin,salt,m){
+  const txt=salt+':'+pin;
+  if(m==='s'){
+    if(!temSubtle())return '';
+    const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));
+    return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+  let h=5381;
+  for(let r=0;r<2000;r++)for(let i=0;i<txt.length;i++)h=((h*33)^txt.charCodeAt(i))>>>0;
+  return 'f'+h.toString(16);
+}
+function saltAleatorio(){let s='';for(let i=0;i<16;i++)s+=Math.floor(Math.random()*16).toString(16);return s}
+async function definirPin(){
+  const a=el('aPin').value,b=el('aPin2').value,msg=el('pinMsg');
+  if(!/^\d{4,6}$/.test(a)){msg.textContent='O PIN deve ter de 4 a 6 números.';return}
+  if(a!==b){msg.textContent='Os dois PINs não são iguais.';return}
+  const m=temSubtle()?'s':'f',s=saltAleatorio();
+  cfg.pin={s,m,h:await hashPin(a,s,m)};
+  gravar(K.cfg,cfg);
+  el('aPin').value='';el('aPin2').value='';
+  msg.textContent='';el('pinStatus').textContent='PIN ligado neste aparelho.';
+}
+function removerPin(){
+  if(!pinAtivo()){el('pinMsg').textContent='Não há PIN definido.';return}
+  if(!confirm('Remover o PIN deste aparelho?'))return;
+  cfg.pin=null;gravar(K.cfg,cfg);
+  el('pinStatus').textContent='PIN desligado.';el('pinMsg').textContent='';
+}
+function trancar(){
+  if(!pinAtivo())return;
+  document.querySelectorAll('.fundo').forEach(f=>f.classList.remove('aberto'));
+  el('app').style.display='none';
+  el('bloqueio').style.display='flex';
+  el('pinEntrada').value='';el('pinErro').textContent='';
+  setTimeout(()=>el('pinEntrada').focus(),50);
+}
+async function tentarPin(){
+  const e=el('pinErro');
+  if(Date.now()<bloqAte){e.textContent='Aguarde '+Math.ceil((bloqAte-Date.now())/1000)+'s para tentar de novo.';return}
+  const h=await hashPin(el('pinEntrada').value,cfg.pin.s,cfg.pin.m);
+  if(h&&h===cfg.pin.h){
+    erros=0;el('bloqueio').style.display='none';el('app').style.display='';el('pinEntrada').value='';
+  }else{
+    el('pinEntrada').value='';erros++;
+    if(erros>=5){erros=0;bloqAte=Date.now()+30000;e.textContent='Muitas tentativas. Aguarde 30s.'}
+    else e.textContent=(h===''&&cfg.pin.m==='s')?'Este navegador não consegue verificar o PIN aqui. Abra o site por https.':'PIN incorreto.';
+  }
+}
+function esqueciPin(){
+  if(!confirm('Isso apaga TODOS os dados da versão de teste neste aparelho (nomes, telefones, marcações e o PIN). Depois você pode restaurar por um backup. Continuar?'))return;
+  try{Object.values(K).forEach(k=>localStorage.removeItem(k))}catch(e){}
+  location.reload();
+}
+
+/* ---------- termos e novidades ---------- */
+function contatoHref(c){
+  c=(c||'').trim();
+  if(/^[^\s@"'<>]+@[^\s@"'<>]+\.[^\s@"'<>]+$/.test(c))return 'mailto:'+c;
+  const d=soDigitos(c);
+  if(/^[\d\s().+-]+$/.test(c)&&telValido(d))return 'https://wa.me/55'+d;
+  return '';
+}
+function abrirTermos(){
+  const c=(cfg.contato||'').trim(),h=contatoHref(c);
+  el('termosContato').innerHTML=c
+    ?'Para pedir correção ou exclusão dos seus dados, fale com: '+(h?`<a href="${esc(h)}" target="_blank" rel="noopener">${esc(c)}</a>`:esc(c))+'.'
+    :'Para pedir correção ou exclusão dos seus dados, fale com quem mantém a lista.';
+  abrirModal('fundoTermos');
+}
+function abrirNovidades(){
+  el('novidCorpo').innerHTML=CHANGELOG.map(v=>`<h3>Atualização ${esc(v.n)} · ${esc(v.data)}</h3><ul>${v.itens.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`).join('');
+  abrirModal('fundoNovidades');
+}
+
+/* ---------- sincronização ---------- */
+function syncAtivo(){return !!(cfg.dbUrl&&cfg.codigo)}
+function urlSync(){return cfg.dbUrl.replace(/\/+$/,'')+'/listas/'+encodeURIComponent(cfg.codigo)+'-teste.json'}
+function status(t){const e=el('syncStatus');if(e)e.textContent=t}
+function hora(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+function pacote(){return {t:tLocal,contatos,env,modelos:cfg.modelos,link:cfg.link,contato:cfg.contato,manut:{ativo:cfg.manut.ativo,ate:cfg.manut.ate,msg:cfg.manut.msg}}}
+function agendarEnvio(){
+  if(!syncAtivo())return;
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(empurrar,1200);
+}
+async function empurrar(){
+  if(!syncAtivo())return;
+  try{
+    const r=await fetch(urlSync(),{method:'PUT',body:JSON.stringify(pacote())});
+    if(!r.ok)throw new Error('http');
+    status('Sincronizado às '+hora());
+  }catch(e){status('Sem conexão com o banco ('+hora()+')')}
+}
+function aplicarRemoto(d){
+  contatos=normalizar(d.contatos);
+  env=normEnv(d.env);
+  aplicarConfigExterna({modelos:d.modelos,texto:d.texto,link:d.link,contato:d.contato});
+  aplicarManutExterna(d.manut);
+  tLocal=Number(d.t)||Date.now();
+  gravar(K.c,contatos);gravar(K.e,env);gravar(K.t,tLocal);gravar(K.cfg,cfg);
+  render();
+}
+async function puxar(manual){
+  if(!syncAtivo()){if(manual)status('Preencha o endereço e o código e salve.');return}
+  try{
+    const r=await fetch(urlSync());
+    if(!r.ok)throw new Error('http');
+    const d=await r.json();
+    if(!d){await empurrar();return}
+    const tr=Number(d.t)||0;
+    if(tr>tLocal){aplicarRemoto(d);status('Atualizado às '+hora())}
+    else if(tr<tLocal)await empurrar();
+    else status('Sincronizado às '+hora());
+  }catch(e){status('Sem conexão com o banco ('+hora()+')')}
+}
+async function primeiraSync(){
+  try{
+    const r=await fetch(urlSync());
+    if(!r.ok)throw new Error('http');
+    const d=await r.json();
+    if(d&&Array.isArray(d.contatos)&&d.contatos.length){
+      const usar=confirm('Já existe uma lista de teste online com esse código ('+d.contatos.length+' nomes).\n\nOK = usar a lista online neste aparelho.\nCancelar = substituir a lista online pela deste aparelho.');
+      if(usar){aplicarRemoto(d);return}
+    }
+    tLocal=Date.now();gravar(K.t,tLocal);
+    await empurrar();
+  }catch(e){status('Sem conexão com o banco ('+hora()+')');alert('Não consegui falar com o banco. Confira o endereço, as regras e a internet.')}
+}
+
+/* ---------- desfazer, lixeira, grupos, copiar, imprimir ---------- */
+function guardar(msg){
+  pilha.push({c:JSON.stringify(contatos),e:JSON.stringify(env),l:JSON.stringify(lixeira),msg});
+  if(pilha.length>15)pilha.shift();
+  avisar(msg,true);
+}
+function avisar(msg,comDesfazer){
+  el('toastTxt').textContent=msg;
+  el('toastBtn').style.display=comDesfazer?'':'none';
+  el('toast').style.display='flex';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{el('toast').style.display='none'},comDesfazer?9000:2500);
+}
+function desfazer(){
+  const s=pilha.pop();
+  if(!s)return;
+  contatos=normalizar(JSON.parse(s.c));env=normEnv(JSON.parse(s.e));lixeira=normLix(JSON.parse(s.l));
+  salvar();
+  avisar('Desfeito.',false);
+}
+function abrirLixeira(){lixeira=normLix(lixeira);renderLix();abrirModal('fundoLixeira')}
+function renderLix(){
+  el('lixCorpo').innerHTML=lixeira.length
+    ?lixeira.map(x=>`<div class="lixitem"><div><b>${esc(x.c.nome)}</b><div class="dica">${x.c.tel?esc(formatar(x.c.tel)):'sem número'} · excluído ${esc(relDias(x.ts))}</div></div><div><button class="mini" onclick="restaurarLix('${x.c.id}')">Restaurar</button><button class="mini" onclick="apagarLix('${x.c.id}')">Apagar</button></div></div>`).join('')
+    :'<div class="vazio">A lixeira está vazia.</div>';
+  el('bLixeira').textContent='Lixeira ('+lixeira.length+')';
+}
+function restaurarLix(id){
+  const i=lixeira.findIndex(x=>x.c.id===id);
+  if(i<0)return;
+  const c=lixeira[i].c;
+  guardar('Restaurado: '+c.nome);
+  if(contatos.some(x=>x.id===c.id))c.id=novoId();
+  contatos.push(c);lixeira.splice(i,1);
+  salvar();renderLix();
+}
+function apagarLix(id){
+  const x=lixeira.find(y=>y.c.id===id);
+  if(!x||!confirm('Apagar "'+x.c.nome+'" de vez? Isso não pode ser desfeito.'))return;
+  lixeira=lixeira.filter(y=>y.c.id!==id);
+  salvar();renderLix();
+}
+function esvaziarLix(){
+  if(!lixeira.length||!confirm('Apagar de vez tudo o que está na lixeira?'))return;
+  lixeira=[];salvar();renderLix();
+}
+function grupoDosMarcados(){
+  if(!sel.size){avisar('Marque primeiro os nomes que vão para o grupo.',false);return}
+  const g=prompt('Nome do grupo para os '+sel.size+' marcados (deixe vazio para tirar do grupo):','');
+  if(g===null)return;
+  const nome=g.trim().slice(0,30);
+  guardar(nome?'Grupo "'+nome+'" definido':'Grupo removido');
+  contatos.forEach(c=>{if(sel.has(c.id))c.grupo=nome});
+  sel.clear();salvar();
+}
+function copiarNum(t){
+  const txt=formatar(t);
+  const ok=()=>avisar('Número copiado: '+txt,false);
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(ok,()=>copiarAlt(txt,ok));
+  else copiarAlt(txt,ok);
+}
+function copiarAlt(txt,ok){
+  const a=document.createElement('textarea');
+  a.value=txt;document.body.appendChild(a);a.select();
+  try{document.execCommand('copy');ok()}catch(e){avisar('Não consegui copiar.',false)}
+  a.remove();
+}
+function imprimirFalta(){
+  const lista=contatos.map((c,i)=>({c,i})).filter(({c})=>!c.ret&&passaGrupo(c));
+  if(!lista.length){avisar('Ninguém falta retirar.',false);return}
+  lista.sort((a,b)=>a.c.nome.localeCompare(b.c.nome,'pt-BR',{sensitivity:'base'}));
+  const tit='Faltam retirar o RG'+(grupoF==='__sem'?' · Sem grupo':grupoF?' · Grupo '+grupoF:'');
+  const linhas=lista.map(({c,i})=>`<tr><td>${i+1}</td><td>${esc(c.nome)}</td><td>${c.tel?esc(formatar(c.tel)):'—'}</td><td>${esc(c.grupo||'')}</td><td>${esc(c.obs)}</td><td>${c.nr?'Não quer receber':''}</td><td class="cx">☐</td></tr>`).join('');
+  el('impressao').innerHTML=`<h2>${esc(tit)}</h2><p>${esc(new Date().toLocaleDateString('pt-BR'))} · ${lista.length} pessoa(s)</p><table><thead><tr><th>Nº</th><th>Nome</th><th>Telefone</th><th>Grupo</th><th>Observações</th><th>Aviso</th><th>Retirou</th></tr></thead><tbody>${linhas}</tbody></table><p class="peq">Documento com dados pessoais (LGPD). Guarde e descarte com cuidado.</p>`;
+  window.addEventListener('afterprint',()=>{el('impressao').innerHTML=''},{once:true});
+  window.print();
+}
+
+/* ---------- modo manutenção ---------- */
+function lerSessao(){try{return sessionStorage.getItem('manutLiberado')||''}catch(e){return ''}}
+function normManut(m){
+  m=(m&&typeof m==='object')?m:{};
+  const sn=m.senha;
+  const senha=(sn&&typeof sn==='object'&&/^[0-9a-f]{16}$/.test(String(sn.s))&&(sn.m==='s'||sn.m==='f')&&typeof sn.h==='string'&&sn.h)?{s:sn.s,m:sn.m,h:sn.h.slice(0,80)}:null;
+  const ate=Number(m.ate)||0;
+  return {ativo:!!m.ativo,ate:ate>0?ate:0,msg:String(m.msg||'').slice(0,140),senha};
+}
+function aplicarManutExterna(x){
+  if(!x||typeof x!=='object')return;
+  const n=normManut(x);
+  cfg.manut.ativo=n.ativo;cfg.manut.ate=n.ate;cfg.manut.msg=n.msg;
+}
+function dataHora(ts){return new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function contagem(ms){
+  const s=Math.floor(Math.max(0,ms)/1000),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),x=s%60;
+  const p=n=>String(n).padStart(2,'0');
+  return (d>0?d+'d ':'')+p(h)+':'+p(m)+':'+p(x);
+}
+function paraInputLocal(ts){
+  const d=new Date(ts),p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+}
+function estadoManut(){
+  const m=cfg.manut,agora=Date.now();
+  if(m.ativo&&(!m.ate||agora<m.ate))return {origem:'local',msg:m.msg,ate:m.ate};
+  const a=manutArq;
+  if(a&&a.ativo===true){
+    let ate=a.ate?Date.parse(a.ate):0;
+    if(isNaN(ate))ate=0;
+    const chave=String(a.ate||'')+'|'+String(a.mensagem||'');
+    if((!ate||agora<ate)&&liberadoSessao!==chave)return {origem:'arquivo',msg:String(a.mensagem||'').slice(0,140),ate,chave};
+  }
+  return null;
+}
+function atualizarManut(){
+  const m=cfg.manut;
+  if(m.ativo&&m.ate&&Date.now()>=m.ate){m.ativo=false;m.ate=0;salvar()}
+  const e=estadoManut(),box=el('manutencao');
+  if(!e){box.style.display='none';return}
+  box.style.display='flex';
+  el('mTexto').textContent=e.msg||MSG_MANUT_PADRAO;
+  el('mPrev').textContent=e.ate?'Previsão de liberação: '+dataHora(e.ate):'Sem previsão de liberação.';
+  el('mTempo').textContent=e.ate?contagem(e.ate-Date.now()):'';
+  el('mAdmBtn').textContent=e.origem==='local'?'Sair do modo manutenção':'Entrar como administrador';
+}
+async function senhaManutOk(p){
+  const sm=cfg.manut.senha;
+  if(!sm)return p===SENHA_PADRAO;
+  const h=await hashPin(p,sm.s,sm.m);
+  return !!h&&h===sm.h;
+}
+async function senhaArquivoOk(p){
+  const a=manutArq||{};
+  if(typeof a.h==='string'&&a.h&&typeof a.s==='string'&&(a.m==='s'||a.m==='f')){
+    const h=await hashPin(p,a.s,a.m);
+    return !!h&&h===a.h;
+  }
+  return p===SENHA_PADRAO;
+}
+async function verificarSenhaManut(p,fn){
+  if(Date.now()<manutBloq)return {ok:false,msg:'Muitas tentativas. Aguarde '+Math.ceil((manutBloq-Date.now())/1000)+'s.'};
+  if(await fn(String(p))){manutErros=0;return {ok:true}}
+  manutErros++;
+  if(manutErros>=5){manutErros=0;manutBloq=Date.now()+30000;return {ok:false,msg:'Muitas tentativas. Aguarde 30s.'}}
+  return {ok:false,msg:'Senha incorreta.'};
+}
+async function manutEntrar(){
+  const e=estadoManut(),erro=el('mErro');
+  if(!e)return;
+  const r=await verificarSenhaManut(el('mSenha').value,e.origem==='local'?senhaManutOk:senhaArquivoOk);
+  if(!r.ok){erro.textContent=r.msg;el('mSenha').value='';return}
+  erro.textContent='';el('mSenha').value='';
+  if(e.origem==='local'){cfg.manut.ativo=false;cfg.manut.ate=0;salvar()}
+  else{liberadoSessao=e.chave;try{sessionStorage.setItem('manutLiberado',e.chave)}catch(x){}}
+  atualizarManut();
+}
+async function checarArquivoManut(){
+  if(!/^https?:$/.test(location.protocol))return;
+  try{
+    const r=await fetch('manutencao.json',{cache:'no-store'});
+    if(!r.ok)throw new Error('http');
+    const d=await r.json();
+    manutArq=(d&&typeof d==='object')?d:null;
+  }catch(e){}
+  atualizarManut();
+}
+function checkarManutInicio(){checarArquivoManut();setInterval(checarArquivoManut,30000)}
+function manutAviso(t,ok){const e=el('manutMsg');e.className=ok?'msgok':'erro';e.textContent=t}
+function preencherManut(){
+  const m=cfg.manut;
+  el('aManutMsg').value=m.msg||MSG_MANUT_PADRAO;
+  el('aManutAte').value=m.ate?paraInputLocal(m.ate):'';
+  el('aManutSenha').value='';el('aManutNova').value='';
+  el('aManutJson').style.display='none';el('bCopiarJson').style.display='none';
+  manutAviso('',true);
+  el('manutStatus').textContent=m.ativo?('Manutenção ATIVA'+(m.ate?' até '+dataHora(m.ate):' (sem data de liberação)')+'.'):'Manutenção desligada.';
+}
+function manutMais(min){
+  const v=el('aManutAte').value;
+  let base=v?new Date(v).getTime():0;
+  if(!base||isNaN(base)||base<Date.now())base=Date.now();
+  el('aManutAte').value=paraInputLocal(base+min*60000);
+}
+async function ativarManut(){
+  const r=await verificarSenhaManut(el('aManutSenha').value,senhaManutOk);
+  if(!r.ok){manutAviso(r.msg,false);return}
+  let ate=0;
+  const v=el('aManutAte').value;
+  if(v){
+    ate=new Date(v).getTime();
+    if(isNaN(ate)||ate<=Date.now()){manutAviso('A data de liberação precisa ser no futuro.',false);return}
+  }else if(!confirm('Sem data de liberação, o site só volta com a senha. Continuar?'))return;
+  cfg.manut.ativo=true;cfg.manut.ate=ate;cfg.manut.msg=el('aManutMsg').value.trim().slice(0,140);
+  el('aManutSenha').value='';
+  fechar('fundoAjustes');salvar();atualizarManut();
+}
+async function desativarManut(){
+  const r=await verificarSenhaManut(el('aManutSenha').value,senhaManutOk);
+  if(!r.ok){manutAviso(r.msg,false);return}
+  cfg.manut.ativo=false;cfg.manut.ate=0;
+  salvar();atualizarManut();preencherManut();manutAviso('Manutenção desativada.',true);
+}
+async function trocarSenhaManut(){
+  const r=await verificarSenhaManut(el('aManutSenha').value,senhaManutOk);
+  if(!r.ok){manutAviso(r.msg,false);return}
+  const nova=el('aManutNova').value;
+  if(nova.length<6||nova.length>40){manutAviso('A nova senha precisa ter de 6 a 40 caracteres.',false);return}
+  const s=saltAleatorio(),m=temSubtle()?'s':'f';
+  cfg.manut.senha={s,m,h:await hashPin(nova,s,m)};
+  gravar(K.cfg,cfg);
+  el('aManutSenha').value='';el('aManutNova').value='';
+  manutAviso('Senha trocada neste aparelho. Outros aparelhos continuam com a senha deles.',true);
+}
+async function gerarJsonManut(){
+  const r=await verificarSenhaManut(el('aManutSenha').value,senhaManutOk);
+  if(!r.ok){manutAviso(r.msg,false);return}
+  let sm=cfg.manut.senha;
+  if(!sm){const s=saltAleatorio(),m=temSubtle()?'s':'f';sm={s,m,h:await hashPin(SENHA_PADRAO,s,m)}}
+  const v=el('aManutAte').value;
+  let ate='';
+  if(v){
+    const t=new Date(v).getTime();
+    if(isNaN(t)||t<=Date.now()){manutAviso('A data de liberação precisa ser no futuro.',false);return}
+    ate=new Date(t).toISOString();
+  }
+  const obj={ativo:true,ate,mensagem:el('aManutMsg').value.trim().slice(0,140)||MSG_MANUT_PADRAO,s:sm.s,m:sm.m,h:sm.h};
+  el('aManutJson').value=JSON.stringify(obj,null,2);
+  el('aManutJson').style.display='';el('bCopiarJson').style.display='';
+  manutAviso('Copie o texto e cole no arquivo manutencao.json do GitHub, substituindo tudo. Para desligar, troque "ativo": true por false.',true);
+}
+function copiarJsonManut(){
+  const t=el('aManutJson');
+  const ok=()=>avisar('Texto copiado.',false);
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t.value).then(ok,()=>{t.select();try{document.execCommand('copy');ok()}catch(e){}});
+  else{t.select();try{document.execCommand('copy');ok()}catch(e){}}
+}
+
+/* ---------- início ---------- */
+el('verTopo').textContent=ATUALIZACAO;el('verRodape').textContent=ATUALIZACAO;
+document.querySelectorAll('.fundo').forEach(f=>f.addEventListener('click',e=>{if(e.target===f)f.classList.remove('aberto')}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.fundo').forEach(f=>f.classList.remove('aberto'))});
+el('pinEntrada').addEventListener('keydown',e=>{if(e.key==='Enter')tentarPin()});
+el('selOrdem').value=cfg.ordem;
+if(ler(K.c,null)===null){gravar(K.c,contatos);gravar(K.e,env)}
+render();
+trancar();
+atualizarManut();setInterval(atualizarManut,1000);
+checkarManutInicio();
+puxar();
+setInterval(puxar,20000);
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ocultoEm=Date.now();return}
+  if(pinAtivo()&&ocultoEm&&Date.now()-ocultoEm>60000)trancar();
+  checarArquivoManut();
+  puxar();
+});
+</script></body></html>
